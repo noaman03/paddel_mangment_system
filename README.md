@@ -2,7 +2,6 @@
 
 A comprehensive Flutter mobile application for booking padel courts and managing tournaments. Designed for both players and court owners with separate, intuitive interfaces for each user type.
 
-**Status:** ✅ Production-Ready | Feature Complete | Portfolio Ready
 
 ---
 
@@ -116,105 +115,6 @@ lib/
 
 ---
 
-## 🌍 Egyptian Localization & Fake Data
-
-The app comes pre-loaded with comprehensive **Egyptian fake data** including:
-
-### **Courts** 🏟️
-1. **نوادي النور بادل - Al Noor Padel Club** (Downtown Cairo) - 250 EGP/hour
-2. **نادي الأحمر - Al Ahmar Padel Club** (New Cairo) - 300 EGP/hour
-3. **نادي الرياضيين - Athletes Club** (Giza) - 200 EGP/hour
-4. **ملاعب الإسكندرية - Alexandria Courts** (Alexandria) - 180 EGP/hour
-
-### **Players** 👥
-- Ahmed Hassan (أحمد حسن)
-- Sara Mohamed (سارة محمد)
-- Fatima Ali (فاطمة علي)
-- Ali Karim (علي كريم)
-- Rainom Abdulrahman (ريانوم عبد الرحمن)
-- Hanem Azima (هانم عظيمة)
-
-### **Tournaments** 🏆
-- **بطولة الربيع - Spring Championship 2025** (16 teams, 25,000 EGP prize)
-- **كأس نهاية الأسبوع - Weekend Warriors Cup** (12 teams, 8,000 EGP prize)
-- **بطولة الصيف الكبرى - Summer Grand Tournament** (24 teams, 50,000 EGP prize)
-- **بطولة الشتاء - Winter Championship** (16 teams, 35,000 EGP prize)
-
-### **Chat Messages** 💬
-- All conversations in Egyptian Arabic (Darija)
-- Real booking discussion examples
-- Tournament enrollment inquiries
-- Court recommendation discussions
-
-### **Reservations** 📅
-- Multiple past and upcoming bookings with Egyptian locations
-- Real date/time information in Egyptian format
-- Status tracking system (Completed, Upcoming, Cancelled)
-
----
-
-## 🚀 Getting Started
-
-### **Prerequisites**
-- Flutter SDK: ^3.5.4
-- Dart SDK: 3.5.4+
-- Android Studio / Xcode (for device simulation)
-- Firebase project (for production deployment)
-
-### **Installation**
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd padelsystem
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Run the app**
-   ```bash
-   flutter run
-   ```
-
-### **Firebase Setup** (For Production)
-1. Create a Firebase project
-2. Enable Firestore, Authentication, and Storage
-3. Download `google-services.json` for Android
-4. Download `GoogleService-Info.plist` for iOS
-5. Place files in respective platform directories
-6. Update connection strings in code
-
----
-
-## 🎮 Demo Credentials
-
-### **Player Login**
-- Email: `player@test.com`
-- Password: `player123`
-
-### **Owner Login**
-- Email: `owner`
-- Password: `owner`
-- ℹ️ Note: Demo uses hardcoded credentials. Replace with Firebase Auth for production.
-
----
-
-## 📊 Current Data (Demo Mode)
-
-The app is pre-populated with Egyptian fake data for demonstration:
-- ✅ 4 functioning padel courts with Egyptian names and locations
-- ✅ 7 active chat conversations in Egyptian Arabic
-- ✅ 5 recent reservations with realistic booking scenarios
-- ✅ 4 tournaments (3 upcoming, 1 completed) with Egyptian naming
-- ✅ All with realistic Egyptian pricing in EGP
-
-**Switch to Firebase** in production to replace demo data with real bookings.
-
----
-
 ## 🔄 Firebase Integration (Ready to Connect)
 
 All screens support Firebase integration:
@@ -273,16 +173,7 @@ Replace placeholder data methods with Firestore queries to go live.
 
 ---
 
-## 🐛 Known Limitations (Demo Mode)
 
-- Chat doesn't persist between app restarts (replace with Firebase)
-- Court bookings not saved to database (add Firebase Firestore)
-- Image uploads use placeholders (implement Firebase Storage)
-- Owner login uses hardcoded credentials (replace with Firebase Auth)
-
-**These are intentional for demo purposes and ready to be replaced with Firebase.**
-
----
 
 ## 🛠️ Development Guide
 
@@ -315,22 +206,7 @@ Replace placeholder data methods with Firestore queries to go live.
 
 ---
 
-## 🚢 Deployment Checklist
 
-Before pushing to production:
-
-- [ ] Connect Firebase backend
-- [ ] Replace hardcoded owner credentials with Firebase Auth
-- [ ] Implement image upload to Firebase Storage
-- [ ] Add Firestore rules for security
-- [ ] Test on multiple devices
-- [ ] Configure app signing for Play Store
-- [ ] Add app icon and splash screen
-- [ ] Set up error logging (Sentry/Firebase Crashlytics)
-- [ ] Performance testing and optimization
-- [ ] User acceptance testing (UAT)
-
----
 
 ## 📦 Dependencies
 
@@ -352,16 +228,6 @@ url_launcher: ^6.3.2           # Deep linking
 
 ---
 
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
 
 ## 📄 License
 
@@ -369,19 +235,12 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ---
 
-## 👨‍💼 Author
 
-**Created by:** [Your Name]  
-**Portfolio:** [Your Website]  
-**GitHub:** [Your GitHub]  
-**LinkedIn:** [Your LinkedIn]
-
----
 
 ## 🤝 Support
 
 For issues, questions, or suggestions:
-- 📧 Email: [your-email@example.com]
+- 📧 Email: [noamana455@gmail.com]
 - 🐛 Report bugs on GitHub Issues
 - 💬 Start a discussion for feature requests
 
@@ -431,4 +290,3 @@ Padel court booking system, Flutter mobile app, Firebase integration, Egyptian p
 
 ---
 
-**Ready for GitHub and your portfolio! 🚀✨**
