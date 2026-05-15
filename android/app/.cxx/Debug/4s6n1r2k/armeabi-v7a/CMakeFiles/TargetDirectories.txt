@@ -1,0 +1,2 @@
+C:/AMIT flutter/padelsystem/android/app/.cxx/Debug/4s6n1r2k/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/AMIT flutter/padelsystem/android/app/.cxx/Debug/4s6n1r2k/armeabi-v7a/CMakeFiles/rebuild_cache.dir

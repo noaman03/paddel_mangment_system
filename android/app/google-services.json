@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "602195181881",
+    "project_id": "padelsystem-b6b67",
+    "storage_bucket": "padelsystem-b6b67.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:602195181881:android:9cb86831c55ec5422d68e8",
+        "android_client_info": {
+          "package_name": "com.example.padelsystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfoJqmlcwTmEG3FvlDb4OBCJm6yBDqpHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
