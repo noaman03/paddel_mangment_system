@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/core/const/colors.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 Color getSkillLevelColor(String skillLevel) {
   switch (skillLevel) {

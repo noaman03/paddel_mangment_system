@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/Features/auth/presentation/login/login_screen.dart';
-import 'package:padelsystem/Features/owner/auth/owner_login_screen.dart';
-import 'package:padelsystem/Features/players/courts/court_browse.dart';
-import 'package:padelsystem/Features/players/open_matches/open_matches.dart';
-import 'package:padelsystem/Features/players/chat/chat_screen.dart';
-import 'package:padelsystem/Features/players/tournaments/tournaments.dart';
-import 'package:padelsystem/Features/players/recent_reservations_widget.dart';
-import 'package:padelsystem/Features/players/court_details/court_details_screen.dart';
-import 'package:padelsystem/Models/padel_court.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/Features/auth/data/provider_auth.dart';
-import 'package:padelsystem/core/const/image_string.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/login_screen.dart';
+import 'package:padel_management_system/Features/owner/auth/owner_login_screen.dart';
+import 'package:padel_management_system/Features/players/courts/court_browse.dart';
+import 'package:padel_management_system/Features/players/open_matches/open_matches.dart';
+import 'package:padel_management_system/Features/players/chat/chat_screen.dart';
+import 'package:padel_management_system/Features/players/tournaments/tournaments.dart';
+import 'package:padel_management_system/Features/players/recent_reservations_widget.dart';
+import 'package:padel_management_system/Features/players/court_details/court_details_screen.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/Features/auth/data/provider_auth.dart';
+import 'package:padel_management_system/core/const/image_string.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
 
 class PlayerHome extends ConsumerStatefulWidget {
   const PlayerHome({super.key});

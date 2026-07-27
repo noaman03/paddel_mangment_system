@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/players/courts/controller/court_data_controller.dart';
-import 'package:padelsystem/Models/padel_court.dart';
+import 'package:padel_management_system/Features/players/courts/controller/court_data_controller.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
 
 class AreaController extends GetxController {
   final RxList<Map<String, dynamic>> filteredAreas =

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/utils/helpers/helper_func.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/utils/helpers/helper_func.dart';
 
 Widget buildFilterButton({
   required IconData icon,

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/controller/datebirth_controller.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/widgets/user_rest/avatar_selection.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/widgets/user_rest/birth_date.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/widgets/user_rest/gender_selection.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/widgets/user_rest/userrest_continue.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/widgets/user_rest/userrest_header.dart';
-import 'package:padelsystem/core/Service/firebase/firebase_storage.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/image_string.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
-import 'package:padelsystem/core/widgets/background_decoration.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/datebirth_controller.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_rest/avatar_selection.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_rest/birth_date.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_rest/gender_selection.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_rest/userrest_continue.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_rest/userrest_header.dart';
+import 'package:padel_management_system/core/Service/firebase/firebase_storage.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/image_string.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
+import 'package:padel_management_system/core/widgets/background_decoration.dart';
 
 // Add this provider definition at the top of your file, outside any class
 final firebaseStorageProvider = Provider<FirebaseStorageService>((ref) {

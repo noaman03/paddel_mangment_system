@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:padelsystem/Models/padel_court.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/Features/players/checkout/checkout_screen.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/Features/players/checkout/checkout_screen.dart';
 
 class CourtDetailsScreen extends ConsumerStatefulWidget {
   final PadelCourt court;

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/players/courts/controller/court_browser_controller.dart';
-import 'package:padelsystem/Features/players/courts/widgets/court_list.dart';
-import 'package:padelsystem/Features/players/courts/widgets/filter_bottomsheet.dart';
-import 'package:padelsystem/Features/players/courts/widgets/area_bottomsheet.dart';
-import 'package:padelsystem/Features/players/courts/widgets/nearest_filter.dart';
-import 'package:padelsystem/core/widgets/player_screen_components.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/utils/helpers/helper_func.dart'; // Add this import
+import 'package:padel_management_system/Features/players/courts/controller/court_browser_controller.dart';
+import 'package:padel_management_system/Features/players/courts/widgets/court_list.dart';
+import 'package:padel_management_system/Features/players/courts/widgets/filter_bottomsheet.dart';
+import 'package:padel_management_system/Features/players/courts/widgets/area_bottomsheet.dart';
+import 'package:padel_management_system/Features/players/courts/widgets/nearest_filter.dart';
+import 'package:padel_management_system/core/widgets/player_screen_components.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/utils/helpers/helper_func.dart'; // Add this import
 
 class CourtBrowseScreen extends StatelessWidget {
   const CourtBrowseScreen({super.key});

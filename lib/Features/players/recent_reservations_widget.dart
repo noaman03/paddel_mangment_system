@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/Features/players/reservations/my_reservations_screen.dart';
-import 'package:padelsystem/Features/players/court_details/court_details_screen.dart';
-import 'package:padelsystem/Models/padel_court.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/Features/players/reservations/my_reservations_screen.dart';
+import 'package:padel_management_system/Features/players/court_details/court_details_screen.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
 
 class RecentReservationsWidget extends ConsumerStatefulWidget {
   const RecentReservationsWidget({super.key});

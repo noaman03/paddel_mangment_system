@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/controller/datebirth_controller.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/datebirth_controller.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
 
 class GenderSelection extends StatelessWidget {
   const GenderSelection({

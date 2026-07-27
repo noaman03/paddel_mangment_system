@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:padelsystem/core/const/colors.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 class SignUpHeader extends StatelessWidget {
   const SignUpHeader({

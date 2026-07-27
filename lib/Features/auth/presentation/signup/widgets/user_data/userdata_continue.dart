@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/controller/continue_data.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/continue_data.dart';
 
 class ContinueData extends StatelessWidget {
   ContinueData(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/controller/continue_data.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/widgets/name_textfield.dart';
-import 'package:padelsystem/core/widgets/password_requirements.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/continue_data.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/widgets/name_textfield.dart';
+import 'package:padel_management_system/core/widgets/password_requirements.dart';
 
 class UserDataForm extends StatelessWidget {
   UserDataForm({

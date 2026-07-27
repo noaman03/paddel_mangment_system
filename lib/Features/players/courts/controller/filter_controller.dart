@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:padelsystem/Models/padel_court.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
 
 class FilterController extends GetxController {
   // Search

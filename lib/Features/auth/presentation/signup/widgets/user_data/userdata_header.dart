@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
 
 class UserdataHeader extends StatelessWidget {
   const UserdataHeader({

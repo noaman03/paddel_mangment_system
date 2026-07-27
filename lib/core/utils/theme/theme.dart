@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/appbar_theme.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/bottom_sheet_theme.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/checkbox_theme.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/chip_theme.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/elevated_button_theme.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/text_field_theme.dart';
-import 'package:padelsystem/core/utils/theme/custom_themes/text_theme.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/appbar_theme.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/bottom_sheet_theme.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/checkbox_theme.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/chip_theme.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/elevated_button_theme.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/text_field_theme.dart';
+import 'package:padel_management_system/core/utils/theme/custom_themes/text_theme.dart';
 
 class appTheme {
   appTheme._();

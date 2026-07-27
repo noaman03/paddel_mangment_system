@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/controller/continue_email.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/continue_email.dart';
 
 class ContinueEmail extends StatelessWidget {
   final TextEditingController emailController;

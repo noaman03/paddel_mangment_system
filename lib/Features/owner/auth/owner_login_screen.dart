@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/route_manager.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/Features/owner/dashboard/owner_dashboard.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/Features/owner/dashboard/owner_dashboard.dart';
 
 class OwnerLoginScreen extends ConsumerStatefulWidget {
   const OwnerLoginScreen({super.key});

@@ -1,6 +1,6 @@
 # Contributing Guide
 
-Thank you for your interest in contributing to the Padel System project! This guide will help you get started.
+Thank you for your interest in contributing to the Padel Management System project! This guide will help you get started.
 
 ---
 
@@ -11,7 +11,7 @@ Thank you for your interest in contributing to the Padel System project! This gu
 ```bash
 # Clone repository
 git clone <your-fork-url>
-cd padelsystem
+cd padel-management-system
 
 # Install Flutter (if not already installed)
 flutter pub get

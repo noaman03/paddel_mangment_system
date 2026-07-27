@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/players/open_matches/controller/open_matches_controller.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatc_colors.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatch_buildformfield.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatch_dropdownfiled.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
+import 'package:padel_management_system/Features/players/open_matches/controller/open_matches_controller.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatc_colors.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatch_buildformfield.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatch_dropdownfiled.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
 
 Widget buildCreateMatchTab(bool isDark) {
   final controller = Get.find<OpenMatchesController>();

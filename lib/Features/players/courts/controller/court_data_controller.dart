@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Models/padel_court.dart';
-import 'package:padelsystem/Features/players/courts/data/padel_court_repository.dart';
-import 'package:padelsystem/core/const/colors.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
+import 'package:padel_management_system/Features/players/courts/data/padel_court_repository.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 class CourtDataController extends GetxController {
   final PadelCourtRepository _repository = PadelCourtRepository();

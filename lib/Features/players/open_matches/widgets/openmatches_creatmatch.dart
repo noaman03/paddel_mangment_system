@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatc_colors.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatc_colors.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
 
 Widget buildMyMatchCard(Map<String, dynamic> match, bool isDark) {
   return Container(

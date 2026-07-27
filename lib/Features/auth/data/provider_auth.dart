@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/Features/auth/data/firebase_auth.dart';
+import 'package:padel_management_system/Features/auth/data/firebase_auth.dart';
 
 // Auth state class to track authentication status
 class AuthState {

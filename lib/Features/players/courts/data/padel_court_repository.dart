@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:padelsystem/Models/padel_court.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
 
 class PadelCourtRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

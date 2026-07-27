@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/user_data.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/user_data.dart';
 
 class ContinueEmailController extends GetxController {
   var isLoading = false.obs;

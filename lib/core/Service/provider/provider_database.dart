@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/core/Service/firebase/firebase_store.dart';
+import 'package:padel_management_system/core/Service/firebase/firebase_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Database operation state class

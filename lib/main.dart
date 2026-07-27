@@ -2,8 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/route_manager.dart';
-import 'package:padelsystem/Features/auth/presentation/login/login_screen.dart';
-import 'package:padelsystem/core/utils/theme/theme.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/login_screen.dart';
+import 'package:padel_management_system/core/utils/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Padel System',
+      title: 'Padel Management System',
       themeMode: ThemeMode.system,
       theme: appTheme.lightTheme,
       darkTheme: appTheme.darkTheme,

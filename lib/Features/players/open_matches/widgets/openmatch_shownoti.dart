@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
-import 'package:padelsystem/Features/players/open_matches/controller/open_matches_controller.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatc_colors.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatches_timestamp.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
+import 'package:padel_management_system/Features/players/open_matches/controller/open_matches_controller.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatc_colors.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatches_timestamp.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
 
 void showNotifications() {
   final bool isDark = ADeviceutils.isDarkMode(Get.context!);

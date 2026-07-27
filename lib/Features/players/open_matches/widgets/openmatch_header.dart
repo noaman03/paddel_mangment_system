@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:padelsystem/Features/players/open_matches/controller/open_matches_controller.dart';
-import 'package:padelsystem/Features/players/open_matches/widgets/openmatch_shownoti.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
+import 'package:padel_management_system/Features/players/open_matches/controller/open_matches_controller.dart';
+import 'package:padel_management_system/Features/players/open_matches/widgets/openmatch_shownoti.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
 
 class Header extends StatelessWidget {
   const Header({

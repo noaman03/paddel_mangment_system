@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
-import 'package:padelsystem/core/widgets/filled_text_field.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
+import 'package:padel_management_system/core/widgets/filled_text_field.dart';
 
 class NameTextField extends StatelessWidget {
   final TextEditingController controller;

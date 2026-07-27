@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/core/utils/helpers/helper_func.dart';
+import 'package:padel_management_system/core/utils/helpers/helper_func.dart';
 
 Widget buildFilterSection(String title, Widget content) {
   bool darkMode = AHelperFunction.isDarkMode(Get.context!);

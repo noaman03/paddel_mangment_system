@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:padelsystem/Features/auth/presentation/login/login_screen.dart';
-import 'package:padelsystem/Features/auth/presentation/login/widgets/divide_socialbutton.dart';
-import 'package:padelsystem/core/const/colors.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/login_screen.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/widgets/divide_socialbutton.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 class SignUpFooter extends StatelessWidget {
   const SignUpFooter({

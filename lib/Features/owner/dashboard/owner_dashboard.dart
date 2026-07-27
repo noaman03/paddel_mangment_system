@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/Features/owner/court_management/owner_court_management.dart';
-import 'package:padelsystem/Features/owner/tournaments/owner_tournaments_screen.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/Features/owner/court_management/owner_court_management.dart';
+import 'package:padel_management_system/Features/owner/tournaments/owner_tournaments_screen.dart';
 import 'package:get/route_manager.dart';
-import 'package:padelsystem/Features/auth/presentation/login/login_screen.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/login_screen.dart';
 
 class OwnerDashboard extends ConsumerStatefulWidget {
   const OwnerDashboard({super.key});

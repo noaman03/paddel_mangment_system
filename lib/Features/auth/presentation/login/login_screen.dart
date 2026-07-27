@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/Features/auth/presentation/login/widgets/divide_socialbutton.dart';
-import 'package:padelsystem/Features/auth/presentation/login/widgets/login_form.dart';
-import 'package:padelsystem/Features/auth/presentation/login/widgets/login_header.dart';
-import 'package:padelsystem/Features/auth/presentation/login/widgets/signup_link.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
-import 'package:padelsystem/core/widgets/background_decoration.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/widgets/divide_socialbutton.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/widgets/login_form.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/widgets/login_header.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/widgets/signup_link.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
+import 'package:padel_management_system/core/widgets/background_decoration.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

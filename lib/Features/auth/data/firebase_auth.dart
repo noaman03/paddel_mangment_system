@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:padelsystem/core/Service/firebase/firebase_store.dart';
+import 'package:padel_management_system/core/Service/firebase/firebase_store.dart';
 
 class firebase_auth {
   final FirebaseAuth _auth = FirebaseAuth.instance;

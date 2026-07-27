@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Models/padel_court.dart';
-import 'package:padelsystem/Features/players/courts/controller/court_browser_controller.dart';
-import 'package:padelsystem/Features/players/courts/widgets/court_details.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/utils/helpers/helper_func.dart';
+import 'package:padel_management_system/Models/padel_court.dart';
+import 'package:padel_management_system/Features/players/courts/controller/court_browser_controller.dart';
+import 'package:padel_management_system/Features/players/courts/widgets/court_details.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/utils/helpers/helper_func.dart';
 
 Widget buildCourtCard(PadelCourt court) {
   final bool dark = AHelperFunction.isDarkMode(Get.context!);

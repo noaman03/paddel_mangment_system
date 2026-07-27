@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:padelsystem/core/const/colors.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final String courtName;

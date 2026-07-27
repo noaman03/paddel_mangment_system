@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:padelsystem/core/const/colors.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 class LocationController extends GetxController {
   // Location state
@@ -235,7 +235,7 @@ class LocationController extends GetxController {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'PadelSystem would like to access your location to provide you with better features:',
+                  'Padel Management System would like to access your location to provide you with better features:',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
                 const SizedBox(height: 16),

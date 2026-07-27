@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/players/tournaments/controller/tournament_controller.dart';
-import 'package:padelsystem/core/widgets/player_screen_components.dart';
-import 'package:padelsystem/core/const/colors.dart';
-import 'package:padelsystem/core/const/sizes.dart';
-import 'package:padelsystem/core/const/text_strings.dart';
+import 'package:padel_management_system/Features/players/tournaments/controller/tournament_controller.dart';
+import 'package:padel_management_system/core/widgets/player_screen_components.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/const/text_strings.dart';
 import 'package:intl/intl.dart';
 
 class TournamentScreen extends StatefulWidget {
@@ -168,7 +168,7 @@ class _TournamentScreenState extends State<TournamentScreen>
                                     : AColors.textprimary,
                                 fontSize: ASizes.fontSizeSm,
                               ),
-                            ), 
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) =>

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:padelsystem/Screens/home/player_home.dart';
-import 'package:padelsystem/Features/owner/dashboard/owner_dashboard.dart';
+import 'package:padel_management_system/Screens/home/player_home.dart';
+import 'package:padel_management_system/Features/owner/dashboard/owner_dashboard.dart';
 
 class LoginController extends GetxController {
   var isObscure = true.obs;

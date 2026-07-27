@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/controller/complete_profile_controller.dart';
-import 'package:padelsystem/Features/auth/presentation/signup/user_rest.dart';
-import 'package:padelsystem/Screens/home/player_home.dart';
-import 'package:padelsystem/Features/auth/data/provider_auth.dart';
-import 'package:padelsystem/core/Service/provider/provider_database.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/complete_profile_controller.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/user_rest.dart';
+import 'package:padel_management_system/Screens/home/player_home.dart';
+import 'package:padel_management_system/Features/auth/data/provider_auth.dart';
+import 'package:padel_management_system/core/Service/provider/provider_database.dart';
 
 class CompleteProfileButton extends StatelessWidget {
   final DateTime? selectedDate;
