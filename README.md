@@ -4,11 +4,26 @@ A Flutter portfolio prototype for padel-court discovery, booking interfaces, tou
 
 [Repository](https://github.com/noaman03/padel-management-system)
 
+[![Download Android demo APK](https://img.shields.io/badge/download-Android%20demo%20APK-2ea44f?logo=android&logoColor=white)](https://github.com/noaman03/padel-management-system/releases/download/v1.0.0-demo.1/Padelit-v1.0.0-demo.1.apk)
+
+The APK is a debug-signed portfolio prerelease for side-loading and evaluation, not a production or Play Store build.
+
 ## Project Status
 
 This project combines implemented Flutter interfaces, selected Firebase data paths, and local demonstration behavior. It is not a production booking system. Authentication, payments, chat, tournaments, and several owner workflows are simulated or only partially connected.
 
-No verified project screenshots are currently committed to the repository.
+## Screenshots
+
+The gallery covers player discovery and booking views together with venue-owner and administrator workflows.
+
+<p align="center">
+  <img src="docs/screenshots/padel-home.webp" width="150" alt="Padelit player home and upcoming reservation">
+  <img src="docs/screenshots/padel-courts.webp" width="150" alt="Padelit court discovery list">
+  <img src="docs/screenshots/padel-tournaments.webp" width="150" alt="Padelit tournament browsing screen">
+  <img src="docs/screenshots/padel-match-details.webp" width="150" alt="Padelit open match details">
+  <img src="docs/screenshots/padel-owner-dashboard.webp" width="150" alt="Padelit venue-owner dashboard">
+  <img src="docs/screenshots/padel-admin-dashboard.webp" width="150" alt="Padelit administration dashboard">
+</p>
 
 ## Demo Authentication Warning
 
