@@ -2,9 +2,8 @@
 
 A Flutter portfolio prototype for padel-court discovery, booking interfaces, tournaments, player communication, and venue-owner dashboards.
 
-[Repository](https://github.com/noaman03/padel-management-system)
-
 [![Download Android demo APK](https://img.shields.io/badge/download-Android%20demo%20APK-2ea44f?logo=android&logoColor=white)](https://github.com/noaman03/padel-management-system/releases/download/v1.0.0-demo.1/Padelit-v1.0.0-demo.1.apk)
+[![Watch demo video](https://img.shields.io/badge/watch-demo%20video-e63946?logo=youtube&logoColor=white)](https://github.com/noaman03/padel-management-system/releases/download/v1.0.0-demo.1/Padelit-Demo.mp4)
 
 The APK is a debug-signed portfolio prerelease for side-loading and evaluation, not a production or Play Store build.
 
@@ -14,22 +13,24 @@ This project combines implemented Flutter interfaces, selected Firebase data pat
 
 ## Screenshots
 
-The gallery covers player discovery and booking views together with venue-owner and administrator workflows.
+Every screen ships in light and dark themes. The gallery covers player discovery, tournaments, matches, and chat together with venue-owner and administrator workflows.
 
-<p align="center">
-  <img src="docs/screenshots/padel-home.webp" width="150" alt="Padelit player home and upcoming reservation">
-  <img src="docs/screenshots/padel-courts.webp" width="150" alt="Padelit court discovery list">
-  <img src="docs/screenshots/padel-tournaments.webp" width="150" alt="Padelit tournament browsing screen">
-  <img src="docs/screenshots/padel-match-details.webp" width="150" alt="Padelit open match details">
-  <img src="docs/screenshots/padel-owner-dashboard.webp" width="150" alt="Padelit venue-owner dashboard">
-  <img src="docs/screenshots/padel-admin-dashboard.webp" width="150" alt="Padelit administration dashboard">
-</p>
+| Light | Dark |
+| :--: | :--: |
+| <img src="docs/screenshots/01-light-login.png" width="260" alt="Padelit login with demo accounts, light theme"> | <img src="docs/screenshots/01-dark-login.png" width="260" alt="Padelit login with demo accounts, dark theme"> |
+| <img src="docs/screenshots/02-light-home.png" width="260" alt="Padelit player home, light theme"> | <img src="docs/screenshots/02-dark-home.png" width="260" alt="Padelit player home, dark theme"> |
+| <img src="docs/screenshots/04-light-courts.png" width="260" alt="Padelit court discovery, light theme"> | <img src="docs/screenshots/04-dark-courts.png" width="260" alt="Padelit court discovery, dark theme"> |
+| <img src="docs/screenshots/08-light-tournaments.png" width="260" alt="Padelit tournaments, light theme"> | <img src="docs/screenshots/08-dark-tournaments.png" width="260" alt="Padelit tournaments, dark theme"> |
+| <img src="docs/screenshots/13-light-matches.png" width="260" alt="Padelit open matches, light theme"> | <img src="docs/screenshots/13-dark-matches.png" width="260" alt="Padelit open matches, dark theme"> |
+| <img src="docs/screenshots/18-light-chat.png" width="260" alt="Padelit chat, light theme"> | <img src="docs/screenshots/18-dark-chat.png" width="260" alt="Padelit chat, dark theme"> |
+| <img src="docs/screenshots/19-light-owner-dashboard.png" width="260" alt="Padelit owner dashboard, light theme"> | <img src="docs/screenshots/19-dark-owner-dashboard.png" width="260" alt="Padelit owner dashboard, dark theme"> |
+| <img src="docs/screenshots/22-light-admin.png" width="260" alt="Padelit admin dashboard, light theme"> | <img src="docs/screenshots/22-dark-admin.png" width="260" alt="Padelit admin dashboard, dark theme"> |
 
 ## Demo Authentication Warning
 
-> The main login controller contains demonstration-only behavior. `owner` / `owner` opens the owner interface, while other non-empty credentials are accepted as a player after a short delay. These checks are hardcoded and must never be used for real authentication.
+> The login screen offers one-tap demo accounts for the player, administrator, and court-owner roles. These are demonstration-only credentials hardcoded in the client and must never be used as real authentication.
 
-A separate Firebase Authentication class and registration flow also exist, but the primary login controller does not call that service.
+A separate Firebase Authentication class and registration flow also exist, but the primary login path signs into the offline demo roles.
 
 ## Feature Status
 
@@ -41,9 +42,9 @@ A separate Firebase Authentication class and registration flow also exist, but t
 | Court discovery | Implemented data path | `PadelCourtRepository` reads and searches court data from Cloud Firestore. |
 | Court booking | Implemented data path | The court repository creates booking records and updates court statistics. |
 | Checkout | Simulated | The UI waits locally and displays a successful payment result; no payment gateway is called. |
-| Player chat | Demo data | Conversation and message lists are seeded in memory; sent messages are not persisted. |
-| Tournaments and open matches | Demo/local state | Player controllers and owner screens use local lists or demonstration content. |
-| Owner court management | Demo/local state | Court management screens use in-memory content; Firebase integration is not completed. |
+| Player chat | Session-persistent demo | A shared in-memory chat store keeps conversations, unread badges, sending, muting, and clearing consistent across screens during a session. |
+| Tournaments and open matches | Session-persistent demo | Players browse, create, and join matches and tournaments with join-request handling backed by shared in-memory stores. |
+| Owner court management | Session-persistent demo | Court and tournament editor screens create and update locally stored records during a session. |
 | Owner dashboard | Demo/local state | Summary values and management sections are presentation-focused. |
 
 ## Player Experience
@@ -52,7 +53,9 @@ A separate Firebase Authentication class and registration flow also exist, but t
 - Open court details and availability interfaces
 - Create reservation records through the Firestore repository path
 - Review reservation, tournament, and open-match interfaces
-- Use the local chat demonstration
+- Use the session-persistent chat demonstration
+- Create open matches, review join requests, and manage joined matches
+- Switch between light and dark themes
 - Review checkout and payment-method interfaces
 
 ## Owner Experience
