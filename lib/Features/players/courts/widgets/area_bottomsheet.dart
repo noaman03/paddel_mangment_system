@@ -1,114 +1,208 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_management_system/Features/players/courts/controller/court_browser_controller.dart';
-import 'package:padel_management_system/Features/players/courts/controller/area_controller.dart';
 import 'package:padel_management_system/core/const/colors.dart';
-import 'package:padel_management_system/core/utils/helpers/helper_func.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/utils/feedback/app_feedback.dart';
 
-void showAreasBottomSheet() {
-  final CourtBrowseController controller = Get.find<CourtBrowseController>();
-  final AreaController areaController = Get.find<AreaController>();
+Future<void> showAreasBottomSheet(BuildContext context) async {
+  final controller = CourtBrowseController.to;
+  final searchController = TextEditingController(
+    text: controller.areaController.searchQuery.value,
+  );
 
-  bool dark = AHelperFunction.isDarkMode(Get.context!);
-  Get.bottomSheet(
-    Container(
-      height: AHelperFunction.screenHeight() * 0.7,
-      decoration: BoxDecoration(
-        color: dark ? Colors.black : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+  await showAppSheet<void>(
+    context,
+    title: 'Areas',
+    subtitle: 'Browse courts by neighbourhood',
+    icon: Icons.location_on_rounded,
+    heightFactor: 0.82,
+    actions: [
+      TextButton(
+        onPressed: () {
+          searchController.clear();
+          controller.areaController.resetSearch();
+          controller.clearAreaFilter();
+        },
+        child: const Text('Clear'),
       ),
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Select Area',
-                  style:
-                      Theme.of(Get.context!).textTheme.headlineMedium?.copyWith(
-                            color: dark ? Colors.white : Colors.black,
-                          ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    controller.clearAreaFilter();
-                    Get.back();
-                  },
-                  child: Text(
-                    'Clear',
-                    style: Theme.of(Get.context!)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(color: dark ? Colors.white : Colors.black),
-                  ),
-                ),
-              ],
+    ],
+    child: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: TextField(
+            controller: searchController,
+            onChanged: controller.searchAreas,
+            decoration: const InputDecoration(
+              hintText: 'Search areas...',
+              prefixIcon: Icon(Icons.search_rounded),
             ),
           ),
+        ),
+        Expanded(child: _AreaList(controller: controller)),
+      ],
+    ),
+  );
 
-          const Divider(),
+  searchController.dispose();
+  controller.areaController.resetSearch();
+}
 
-          // Area Search
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search areas...',
-                prefixIcon: const Icon(Icons.location_on),
-                border: OutlineInputBorder(
+class _AreaList extends StatelessWidget {
+  const _AreaList({required this.controller});
+
+  final CourtBrowseController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.padel;
+
+    return Obx(() {
+      final areas = controller.areaController.filteredAreas.toList();
+      // Read inside the Obx closure: `itemBuilder` runs lazily during layout,
+      // so a read in there would never be tracked.
+      final selected = controller.filterController.selectedArea.value;
+
+      if (areas.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'No area matches that search.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: c.textSecondary),
+            ),
+          ),
+        );
+      }
+
+      return ListView.separated(
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
+        itemCount: areas.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(height: 4),
+        itemBuilder: (listContext, index) {
+          if (index == 0) {
+            return _AreaTile(
+              name: 'All areas',
+              subtitle:
+                  '${controller.courtDataController.allCourts.length} courts in total',
+              icon: Icons.public_rounded,
+              isSelected: selected.isEmpty,
+              onTap: () {
+                controller.clearAreaFilter();
+                Navigator.pop(listContext);
+              },
+            );
+          }
+
+          final area = areas[index - 1];
+          return _AreaTile(
+            name: area.name,
+            subtitle: area.courtCount == 1
+                ? '1 court available'
+                : '${area.courtCount} courts available',
+            icon: Icons.location_city_rounded,
+            isSelected: selected == area.name,
+            enabled: area.courtCount > 0,
+            onTap: () {
+              if (area.courtCount == 0) {
+                AppFeedback.info(
+                  area.name,
+                  'No courts listed in this area yet.',
+                );
+                return;
+              }
+              controller.selectArea(area.name);
+              Navigator.pop(listContext);
+            },
+          );
+        },
+      );
+    });
+  }
+}
+
+class _AreaTile extends StatelessWidget {
+  const _AreaTile({
+    required this.name,
+    required this.subtitle,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+    this.enabled = true,
+  });
+
+  final String name;
+  final String subtitle;
+  final IconData icon;
+  final bool isSelected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.padel;
+    final theme = Theme.of(context);
+
+    return Material(
+      color: isSelected ? c.primarySoft : Colors.transparent,
+      borderRadius: BorderRadius.circular(ASizes.cardRadiusMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(ASizes.cardRadiusMd),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: isSelected ? AColors.primaryDeep : c.surfaceElevated,
                   borderRadius: BorderRadius.circular(12),
                 ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: isSelected
+                      ? c.foregroundOn(AColors.primaryDeep)
+                      : (enabled ? c.brandText : c.textMuted),
+                ),
               ),
-              onChanged: areaController.searchAreas,
-            ),
-          ),
-
-          // Areas List
-          Expanded(
-            child: Obx(() => ListView.builder(
-                  itemCount: areaController.filteredAreas.length,
-                  itemBuilder: (context, index) {
-                    final area = areaController.filteredAreas[index];
-                    final isSelected =
-                        controller.filterController.selectedArea.value ==
-                            area['name'];
-
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: isSelected
-                            ? AColors.primaryColor
-                            : AColors.primaryColor.withOpacity(0.1),
-                        child: Icon(
-                          Icons.location_city,
-                          color:
-                              isSelected ? Colors.white : AColors.primaryColor,
-                        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: enabled ? c.textPrimary : c.textMuted,
                       ),
-                      title: Text(
-                        area['name'],
-                        style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      subtitle: Text('${area['courtCount']} courts available'),
-                      trailing: isSelected
-                          ? const Icon(Icons.check, color: AColors.primaryColor)
-                          : const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        controller.selectArea(area['name']);
-                        Get.back();
-                      },
-                    );
-                  },
-                )),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: c.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                isSelected ? Icons.check_circle_rounded : Icons.chevron_right,
+                size: isSelected ? 22 : 20,
+                color: isSelected ? c.brandText : c.textMuted,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
-    isScrollControlled: true,
-  );
+    );
+  }
 }

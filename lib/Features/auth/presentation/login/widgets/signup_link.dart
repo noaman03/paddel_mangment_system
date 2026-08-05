@@ -3,18 +3,16 @@ import 'package:get/get.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/user_email.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
-import 'package:padel_management_system/core/const/text_strings.dart';
 
 class SignUpLink extends StatelessWidget {
   const SignUpLink({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = ADeviceutils.isDarkMode(context);
+    final c = context.padel;
 
     return Center(
-      child: Container(
-        width: double.infinity,
+      child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: ASizes.paddingMd,
           vertical: ASizes.paddingSm,
@@ -29,17 +27,14 @@ class SignUpLink extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(ASizes.borderRadiusLg),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: ASizes.paddingSm,
-              vertical: ASizes.paddingSm,
-            ),
+            padding: const EdgeInsets.all(ASizes.paddingSm),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.person_add_outlined,
-                  color: AColors.primaryColor,
+                  color: c.brandText,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -49,16 +44,13 @@ class SignUpLink extends StatelessWidget {
                     child: Text.rich(
                       TextSpan(
                         text: 'Don\'t have an account? ',
-                        style: TextStyle(
-                          color: isDark ? AColors.grey : AColors.darkGrey,
-                          fontSize: 14,
-                        ),
-                        children: const [
+                        style: TextStyle(color: c.textSecondary, fontSize: 14),
+                        children: [
                           TextSpan(
                             text: 'Sign up',
                             style: TextStyle(
-                              color: AColors.primaryColor,
-                              fontWeight: FontWeight.w600,
+                              color: c.brandText,
+                              fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
                           ),

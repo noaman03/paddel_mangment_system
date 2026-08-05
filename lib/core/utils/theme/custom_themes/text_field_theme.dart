@@ -3,76 +3,98 @@ import 'package:padel_management_system/core/const/colors.dart';
 
 class ATextFormFieldTheme {
   ATextFormFieldTheme._();
+
   static InputDecorationTheme lightInputDecorationTheme = InputDecorationTheme(
     filled: true,
-    fillColor: Colors.white,
+    fillColor: AColors.white,
     errorMaxLines: 3,
-    prefixIconColor: Colors.grey,
-    suffixIconColor: Colors.grey,
-    labelStyle: const TextStyle().copyWith(color: Colors.black, fontSize: 14.0),
-    hintStyle: const TextStyle().copyWith(color: Colors.black, fontSize: 14.0),
-    errorStyle: const TextStyle().copyWith(
-      color: Colors.red,
+    prefixIconColor: AColors.darkGrey,
+    suffixIconColor: AColors.darkGrey,
+    labelStyle: const TextStyle(
+      color: AColors.textsecondarry,
+      fontSize: 14.0,
+    ),
+    hintStyle: const TextStyle(
+      color: AColors.darkGrey,
+      fontSize: 14.0,
+    ),
+    errorStyle: const TextStyle(
+      color: AColors.error,
       fontStyle: FontStyle.normal,
     ),
-    floatingLabelStyle: const TextStyle().copyWith(
-      color: Colors.black.withOpacity(0.8),
-    ),
-    border: const OutlineInputBorder().copyWith(
+    floatingLabelStyle: const TextStyle(color: AColors.primaryColor),
+    border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+      borderSide: const BorderSide(color: AColors.borderPrimary, width: 1.0),
     ),
-    focusedBorder: const OutlineInputBorder().copyWith(
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AColors.borderPrimary, width: 1.0),
+    ),
+    focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: const BorderSide(color: AColors.primaryColor, width: 2.0),
     ),
-    enabledBorder: const OutlineInputBorder().copyWith(
+    disabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+      borderSide: const BorderSide(color: AColors.borderSecondary, width: 1.0),
     ),
-    focusedErrorBorder: const OutlineInputBorder().copyWith(
+    focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.orange, width: 1.0),
+      borderSide: const BorderSide(color: AColors.error, width: 2.0),
     ),
-    errorBorder: const OutlineInputBorder().copyWith(
+    errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.red, width: 1.0),
+      borderSide: const BorderSide(color: AColors.error, width: 1.0),
     ),
   );
+
+  /// The dark input theme previously used a **white** fill with black hint
+  /// text, while the dark text theme painted the typed text white — so
+  /// everything the user typed was invisible. It now uses a dark elevated
+  /// surface with light text.
   static InputDecorationTheme darkInputDecorationTheme = InputDecorationTheme(
-    errorMaxLines: 3,
     filled: true,
-    fillColor: AColors.white,
-    prefixIconColor: Colors.grey,
-    suffixIconColor: Colors.grey,
-    labelStyle: const TextStyle().copyWith(color: Colors.black, fontSize: 14.0),
-    hintStyle: const TextStyle().copyWith(color: Colors.black, fontSize: 14.0),
-    errorStyle: const TextStyle().copyWith(
-      color: Colors.red,
+    fillColor: AColors.containerDarkElevated,
+    errorMaxLines: 3,
+    prefixIconColor: AColors.grey,
+    suffixIconColor: AColors.grey,
+    labelStyle: const TextStyle(
+      color: AColors.textSecondaryDark,
+      fontSize: 14.0,
+    ),
+    hintStyle: const TextStyle(
+      color: AColors.grey,
+      fontSize: 14.0,
+    ),
+    errorStyle: const TextStyle(
+      color: AColors.error,
       fontStyle: FontStyle.normal,
     ),
-    floatingLabelStyle: const TextStyle().copyWith(
-      color: Colors.black.withOpacity(0.8),
-    ),
-    border: const OutlineInputBorder().copyWith(
+    floatingLabelStyle: const TextStyle(color: AColors.primaryColor),
+    border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+      borderSide: const BorderSide(color: AColors.borderDark, width: 1.0),
     ),
-    focusedBorder: const OutlineInputBorder().copyWith(
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AColors.borderDark, width: 1.0),
+    ),
+    focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: const BorderSide(color: AColors.primaryColor, width: 2.0),
     ),
-    enabledBorder: const OutlineInputBorder().copyWith(
+    disabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+      borderSide: const BorderSide(color: AColors.borderDark, width: 1.0),
     ),
-    focusedErrorBorder: const OutlineInputBorder().copyWith(
+    focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.orange, width: 1.0),
+      borderSide: const BorderSide(color: AColors.error, width: 2.0),
     ),
-    errorBorder: const OutlineInputBorder().copyWith(
+    errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Colors.red, width: 1.0),
+      borderSide: const BorderSide(color: AColors.error, width: 1.0),
     ),
   );
 }

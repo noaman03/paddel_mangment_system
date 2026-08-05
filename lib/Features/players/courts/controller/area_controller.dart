@@ -1,101 +1,90 @@
 import 'package:get/get.dart';
-import 'package:padel_management_system/Features/players/courts/controller/court_data_controller.dart';
 import 'package:padel_management_system/Models/padel_court.dart';
 
-class AreaController extends GetxController {
-  final RxList<Map<String, dynamic>> filteredAreas =
-      <Map<String, dynamic>>[].obs;
+/// One selectable area plus how many courts it currently holds.
+class AreaOption {
+  const AreaOption(this.name, this.courtCount);
 
-  final List<Map<String, dynamic>> areas = [
-    {'name': 'Downtown Cairo', 'courtCount': 0},
-    {'name': 'New Cairo', 'courtCount': 0},
-    {'name': 'Maadi', 'courtCount': 0},
-    {'name': 'Zamalek', 'courtCount': 0},
-    {'name': 'Heliopolis', 'courtCount': 0},
-    {'name': 'Giza', 'courtCount': 0},
-    {'name': '6th of October', 'courtCount': 0},
-    {'name': 'Nasr City', 'courtCount': 0},
+  final String name;
+  final int courtCount;
+}
+
+class AreaController extends GetxController {
+  /// Every known area with live counts — the authoritative list.
+  final RxList<AreaOption> allAreas = <AreaOption>[].obs;
+
+  /// What the Areas sheet renders (i.e. [allAreas] narrowed by the search box).
+  final RxList<AreaOption> filteredAreas = <AreaOption>[].obs;
+
+  final RxString searchQuery = ''.obs;
+
+  static const List<String> knownAreas = <String>[
+    'Downtown Cairo',
+    'New Cairo',
+    'Maadi',
+    'Zamalek',
+    'Heliopolis',
+    'Giza',
+    '6th of October',
+    'Nasr City',
+    'Sheikh Zayed',
   ];
 
   @override
   void onInit() {
     super.onInit();
-    filteredAreas.value = areas;
+    allAreas.value =
+        knownAreas.map((name) => AreaOption(name, 0)).toList(growable: false);
+    filteredAreas.value = allAreas;
   }
 
-  // Update court counts for each area
+  /// Recomputes court counts per area and re-applies the active search term.
   void updateAreaCounts(List<PadelCourt> courts) {
-    final areasCounts = <String, int>{};
+    final counts = <String, int>{for (final name in knownAreas) name: 0};
 
-    // Initialize all areas with 0 count
-    for (final area in areas) {
-      areasCounts[area['name']] = 0;
-    }
-
-    // Count courts in each area
     for (final court in courts) {
-      final location = court.location;
-      if (areasCounts.containsKey(location)) {
-        areasCounts[location] = areasCounts[location]! + 1;
-      } else {
-        // Add new area if not in predefined list
-        areasCounts[location] = 1;
-      }
+      counts[court.location] = (counts[court.location] ?? 0) + 1;
     }
 
-    // Update filteredAreas with counts
-    final updatedAreas = <Map<String, dynamic>>[];
-    areasCounts.forEach((name, count) {
-      updatedAreas.add({'name': name, 'courtCount': count});
-    });
+    final updated = counts.entries
+        .map((entry) => AreaOption(entry.key, entry.value))
+        .toList()
+      ..sort((a, b) {
+        final countCompare = b.courtCount.compareTo(a.courtCount);
+        return countCompare != 0 ? countCompare : a.name.compareTo(b.name);
+      });
 
-    // Sort by court count (descending) then by name
-    updatedAreas.sort((a, b) {
-      final countCompare = b['courtCount'].compareTo(a['courtCount']);
-      return countCompare != 0 ? countCompare : a['name'].compareTo(b['name']);
-    });
-
-    filteredAreas.value = updatedAreas;
+    allAreas.value = updated;
+    _applySearch();
   }
 
-  // Search areas
+  /// Always narrows from [allAreas]; filtering `filteredAreas` in place made the
+  /// list monotonic, so deleting characters never brought areas back.
   void searchAreas(String query) {
+    searchQuery.value = query.trim();
+    _applySearch();
+  }
+
+  void resetSearch() {
+    searchQuery.value = '';
+    _applySearch();
+  }
+
+  void _applySearch() {
+    final query = searchQuery.value.toLowerCase();
     if (query.isEmpty) {
-      // Reset to full list with current counts instead of static areas
-      updateAreaCounts(_getCurrentCourts());
-    } else {
-      final filtered = filteredAreas
-          .where((area) => area['name']
-              .toString()
-              .toLowerCase()
-              .contains(query.toLowerCase()))
-          .toList();
-      filteredAreas.value = filtered;
+      filteredAreas.value = List<AreaOption>.from(allAreas);
+      return;
     }
+    filteredAreas.value = allAreas
+        .where((area) => area.name.toLowerCase().contains(query))
+        .toList();
   }
 
-  // Helper method to get current courts (this should be injected or passed)
-  List<PadelCourt> _getCurrentCourts() {
-    // This is a temporary solution - ideally this should be injected
-    try {
-      final courtDataController = Get.find<CourtDataController>();
-      return courtDataController.allCourts;
-    } catch (e) {
-      return [];
+  int courtCountFor(String areaName) {
+    for (final area in allAreas) {
+      if (area.name == areaName) return area.courtCount;
     }
-  }
-
-  // Get areas by court count
-  List<Map<String, dynamic>> getAreasByCourtCount({bool ascending = false}) {
-    final sorted = List<Map<String, dynamic>>.from(filteredAreas);
-    sorted.sort((a, b) => ascending
-        ? a['courtCount'].compareTo(b['courtCount'])
-        : b['courtCount'].compareTo(a['courtCount']));
-    return sorted;
-  }
-
-  // Get areas with courts only
-  List<Map<String, dynamic>> getAreasWithCourts() {
-    return filteredAreas.where((area) => area['courtCount'] > 0).toList();
+    return 0;
   }
 }

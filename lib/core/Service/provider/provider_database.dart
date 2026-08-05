@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:padel_management_system/core/Service/firebase/firebase_store.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Database operation state class
 class DatabaseState {
@@ -16,16 +17,21 @@ class DatabaseState {
     this.isSuccess = false,
   });
 
-  // Create a copy with updated fields
+  /// Create a copy with updated fields.
+  ///
+  /// [error] used to be assigned unconditionally, so any `copyWith` that did
+  /// not mention it silently wiped an error before the UI could render it.
+  /// Clearing is now explicit via [clearError].
   DatabaseState copyWith({
     bool? isLoading,
     String? error,
     Map<String, dynamic>? data,
     bool? isSuccess,
+    bool clearError = false,
   }) {
     return DatabaseState(
       isLoading: isLoading ?? this.isLoading,
-      error: error, // null will clear the error
+      error: clearError ? null : (error ?? this.error),
       data: data ?? this.data,
       isSuccess: isSuccess ?? this.isSuccess,
     );
@@ -49,7 +55,7 @@ class DatabaseNotifier extends StateNotifier<DatabaseState> {
     required String gender,
     String collectionname = 'players', // Default collection
   }) async {
-    state = state.copyWith(isLoading: true, error: null, isSuccess: false);
+    state = state.copyWith(isLoading: true, clearError: true, isSuccess: false);
 
     try {
       await _firestoreService.createuser(
@@ -91,13 +97,14 @@ class DatabaseNotifier extends StateNotifier<DatabaseState> {
   // Get user data from Firestore
   Future<void> getUserData(String userId,
       {String collection = 'players'}) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection(collection)
           .doc(userId)
-          .get();
+          .get()
+          .timeout(FirebaseStore.writeTimeout);
 
       if (snapshot.exists) {
         state = state.copyWith(
@@ -121,13 +128,22 @@ class DatabaseNotifier extends StateNotifier<DatabaseState> {
   // Update user data
   Future<void> updateUserData(String userId, Map<String, dynamic> data,
       {String collection = 'players'}) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
+      // Offline persistence keeps this Future pending until a server
+      // acknowledges, which in this build is never — hence the timeout, which
+      // is treated as a local-only success.
       await FirebaseFirestore.instance
           .collection(collection)
           .doc(userId)
-          .update(data);
+          .set(data, SetOptions(merge: true))
+          .timeout(
+        FirebaseStore.writeTimeout,
+        onTimeout: () {
+          debugPrint('Firestore unreachable — profile update kept locally.');
+        },
+      );
 
       state = state.copyWith(
         isLoading: false,
@@ -146,13 +162,19 @@ class DatabaseNotifier extends StateNotifier<DatabaseState> {
   // Delete user data
   Future<void> deleteUser(String userId,
       {String collection = 'players'}) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       await FirebaseFirestore.instance
           .collection(collection)
           .doc(userId)
-          .delete();
+          .delete()
+          .timeout(
+        FirebaseStore.writeTimeout,
+        onTimeout: () {
+          debugPrint('Firestore unreachable — delete queued locally.');
+        },
+      );
 
       state = state.copyWith(
         isLoading: false,
@@ -170,7 +192,7 @@ class DatabaseNotifier extends StateNotifier<DatabaseState> {
   // Clear any error messages
   void clearError() {
     if (state.error != null) {
-      state = state.copyWith(error: null);
+      state = state.copyWith(clearError: true);
     }
   }
 }

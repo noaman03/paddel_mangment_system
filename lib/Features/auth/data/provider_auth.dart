@@ -1,4 +1,7 @@
+// ignore_for_file: camel_case_types
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:padel_management_system/Features/auth/data/firebase_auth.dart';
 
@@ -37,11 +40,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _getCurrentUser();
   }
 
-  // Get current logged-in user
-  Future<void> _getCurrentUser() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      state = state.copyWith(user: currentUser);
+  // Get current logged-in user.
+  //
+  // Goes through the service rather than `FirebaseAuth.instance` so an offline
+  // build (where `Firebase.initializeApp` failed) yields null instead of
+  // throwing out of whatever widget first watched this provider.
+  void _getCurrentUser() {
+    try {
+      final currentUser = _firebaseAuth.getCurrentUser();
+      if (currentUser != null) {
+        state = state.copyWith(user: currentUser);
+      }
+    } catch (e) {
+      debugPrint('Could not read the current user: $e');
     }
   }
 
@@ -93,26 +104,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         gender: gender,
       );
 
-      // Important: Get the updated user manually after registration
-      final user = FirebaseAuth.instance.currentUser;
-      final userId = user?.uid;
-
-      if (userId == null) {
-        // Wait briefly and try again
+      // Firebase populates `currentUser` asynchronously right after the
+      // account is created, so give it one short retry before giving up.
+      var user = _firebaseAuth.getCurrentUser();
+      if (user == null) {
         await Future.delayed(const Duration(milliseconds: 500));
-        final retryUser = FirebaseAuth.instance.currentUser;
-        final retryUserId = retryUser?.uid;
-
-        if (retryUserId == null) {
-          throw Exception('User ID not available after registration');
-        }
-
-        // Continue with retryUserId
+        user = _firebaseAuth.getCurrentUser();
+      }
+      if (user == null) {
+        throw Exception('User ID not available after registration');
       }
 
-      // Continue with userId
-
-      // Update the state with the user
       state = state.copyWith(isLoading: false, user: user);
 
       return user;
@@ -121,7 +123,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         errorMessage: "Registration failed: ${e.toString()}",
       );
-      throw e; // Re-throw to allow handling upstream
+      rethrow; // Allow handling upstream
     }
   }
 
@@ -129,8 +131,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     try {
       state = state.copyWith(isLoading: true);
-      await FirebaseAuth.instance.signOut();
-      state = AuthState(); // Reset to initial state
+      await _firebaseAuth.logout();
+      state = const AuthState(); // Reset to initial state
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -143,7 +145,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> resetPassword(String email) async {
     try {
       state = state.copyWith(isLoading: true, errorMessage: null);
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      await _firebaseAuth.resetPassword(email: email);
       state = state.copyWith(
         isLoading: false,
       );

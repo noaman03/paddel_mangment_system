@@ -1,4 +1,11 @@
+/// Spacing, sizing and radius tokens.
+///
+/// Several names below are deliberate aliases of one canonical value
+/// (`paddingMd`/`spaceBtwItems` are both `md`). They are defined *in terms of*
+/// the canonical constant so the pair can no longer drift apart in a refactor.
 class ASizes {
+  ASizes._();
+
   // Padding and margin sizes
   static const double xs = 4.0;
   static const double sm = 8.0;
@@ -18,7 +25,9 @@ class ASizes {
   static const double fontSizeLg = 18.0;
 
   // Button sizes
-  static const double buttonHeight = 18.0;
+  /// Minimum tappable button height. This used to be 18.0 — a font size, not a
+  /// button height — which would have overflowed any label that adopted it.
+  static const double buttonHeight = 48.0;
   static const double buttonRadius = 12.0;
   static const double buttonWidth = 120.0;
   static const double buttonElevation = 4.0;
@@ -29,10 +38,10 @@ class ASizes {
   // Image sizes
   static const double imageThumbSize = 80.0;
 
-  // Default spacing between sections
-  static const double defaultSpace = 24.0;
-  static const double spaceBtwItems = 16.0;
-  static const double spaceBtwSections = 32.0;
+  // Default spacing between sections (aliases of the canonical scale above)
+  static const double defaultSpace = lg;
+  static const double spaceBtwItems = md;
+  static const double spaceBtwSections = xl;
 
   // Border radius
   static const double borderRadiusSm = 4.0;
@@ -49,7 +58,7 @@ class ASizes {
 
   // Input field
   static const double inputFieldRadius = 12.0;
-  static const double spaceBtwInputFields = 16.0;
+  static const double spaceBtwInputFields = md;
 
   // Card sizes
   static const double cardRadiusLg = 16.0;
@@ -67,8 +76,8 @@ class ASizes {
   // Grid view spacing
   static const double gridViewSpacing = 16.0;
 
-  //padding
-  static const double paddingSm = 8.0;
-  static const double paddingMd = 16.0;
-  static const double paddingLg = 24.0;
+  //padding (aliases of the canonical scale above)
+  static const double paddingSm = sm;
+  static const double paddingMd = md;
+  static const double paddingLg = lg;
 }

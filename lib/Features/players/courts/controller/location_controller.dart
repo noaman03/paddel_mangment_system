@@ -1,464 +1,265 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/utils/feedback/app_feedback.dart';
+
+/// A hand-picked area the user can drop themselves into.
+///
+/// The demo runs on desktop/web where the real permission flow can never
+/// succeed, which used to leave the "Nearest" sheet stuck on "Enable Location"
+/// forever. Picking an area sets the coordinates directly so distance sorting,
+/// the distance slider and the per-card distance labels all become live.
+class DemoArea {
+  const DemoArea(this.name, this.latitude, this.longitude);
+
+  final String name;
+  final double latitude;
+  final double longitude;
+}
 
 class LocationController extends GetxController {
+  static const List<DemoArea> demoAreas = <DemoArea>[
+    DemoArea('Downtown Cairo', 30.0444, 31.2357),
+    DemoArea('New Cairo', 30.0300, 31.4700),
+    DemoArea('Maadi', 29.9600, 31.2570),
+    DemoArea('Zamalek', 30.0610, 31.2200),
+    DemoArea('Heliopolis', 30.0910, 31.3300),
+    DemoArea('Giza', 30.0130, 31.2090),
+    DemoArea('Nasr City', 30.0600, 31.3400),
+    DemoArea('Sheikh Zayed', 30.0130, 30.9760),
+    DemoArea('6th of October', 29.9390, 30.9140),
+  ];
+
+  /// Fallback position, used before a location is set and again after it is
+  /// cleared. Named constants so "clear" can never drift from the initial state.
+  static const String defaultLocationName = 'Downtown, Cairo';
+  static const double defaultLatitude = 30.0444;
+  static const double defaultLongitude = 31.2357;
+  static const double defaultMaxDistance = 50.0;
+
   // Location state
-  final RxString currentLocation = 'Downtown, Cairo'.obs;
-  final RxDouble currentLatitude = 30.0444.obs; // Cairo default
-  final RxDouble currentLongitude = 31.2357.obs; // Cairo default
-  final RxDouble maxDistance = 50.0.obs;
+  final RxString currentLocation = defaultLocationName.obs;
+  final RxDouble currentLatitude = defaultLatitude.obs; // Cairo default
+  final RxDouble currentLongitude = defaultLongitude.obs; // Cairo default
+  final RxDouble maxDistance = defaultMaxDistance.obs;
+
+  /// True once we have a usable position, from GPS *or* from a picked area.
   final RxBool locationPermissionGranted = false.obs;
+  final RxBool usingPickedArea = false.obs;
   final RxBool locationServiceEnabled = false.obs;
   final RxBool isUpdatingLocation = false.obs;
   final RxBool isRequestingPermission = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _initializeLocation();
+  /// Why the device location failed, rendered inline in the Nearest sheet.
+  /// Empty when there is nothing to report.
+  final RxString statusMessage = ''.obs;
+
+  /// Set when the OS reports the permission as permanently blocked, so the
+  /// sheet can offer a settings shortcut instead of a dead retry button.
+  final RxBool permissionBlocked = false.obs;
+
+  /// Drop the user into a known area without touching the platform at all.
+  void useDemoArea(DemoArea area) {
+    currentLatitude.value = area.latitude;
+    currentLongitude.value = area.longitude;
+    currentLocation.value = area.name;
+    usingPickedArea.value = true;
+    locationPermissionGranted.value = true;
+    permissionBlocked.value = false;
+    statusMessage.value = '';
+    AppFeedback.success('Location set', 'Showing courts near ${area.name}');
   }
 
-  // Initialize location on app start
-  Future<void> _initializeLocation() async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      await requestLocationPermission();
-    } catch (e) {
-      print('Error initializing location: $e');
-    }
+  bool isSelectedArea(DemoArea area) =>
+      usingPickedArea.value && currentLocation.value == area.name;
+
+  /// Forget the current position and go back to "location not set".
+  ///
+  /// Nothing used to write `false` back into [locationPermissionGranted], so a
+  /// single tap on an area chip locked the app into "nearest" mode for the rest
+  /// of the session — distance filtering and distance sorting could never be
+  /// turned off again.
+  void clearLocation() {
+    currentLatitude.value = defaultLatitude;
+    currentLongitude.value = defaultLongitude;
+    currentLocation.value = defaultLocationName;
+    usingPickedArea.value = false;
+    locationPermissionGranted.value = false;
+    permissionBlocked.value = false;
+    statusMessage.value = '';
   }
 
-  // Request location permission
+  /// Ask the device for a real position.
+  ///
+  /// The permission flag and coordinates are committed BEFORE any user
+  /// feedback: the old version raised its "granted" snackbar inside the try
+  /// block, and because `Get.snackbar` throws on this Flutter version the catch
+  /// immediately flipped permission back to denied. Feedback now happens after
+  /// the try/catch, where it cannot corrupt state.
   Future<void> requestLocationPermission() async {
-    try {
-      isRequestingPermission.value = true;
-      print('Starting location permission request...');
+    if (isRequestingPermission.value) return;
 
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    isRequestingPermission.value = true;
+    statusMessage.value = '';
+
+    bool granted = false;
+    bool blocked = false;
+    String? failure;
+    double? latitude;
+    double? longitude;
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       locationServiceEnabled.value = serviceEnabled;
 
       if (!serviceEnabled) {
-        await _showLocationServiceDialog();
-        return;
-      }
-
-      // Check current permission status
-      LocationPermission geolocatorPermission =
-          await Geolocator.checkPermission();
-      print('Geolocator permission status: $geolocatorPermission');
-
-      if (geolocatorPermission == LocationPermission.denied) {
-        bool shouldRequest = await _showPermissionExplanationDialog();
-
-        if (!shouldRequest) {
-          locationPermissionGranted.value = false;
-          currentLocation.value = 'Location permission not requested';
-          _showPermissionNotRequestedMessage();
-          return;
+        failure = 'Location services are turned off on this device.';
+      } else {
+        var permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
         }
 
-        geolocatorPermission = await Geolocator.requestPermission();
-        await Future.delayed(const Duration(milliseconds: 1000));
-      }
-
-      if (geolocatorPermission == LocationPermission.deniedForever) {
-        locationPermissionGranted.value = false;
-        currentLocation.value = 'Location permission permanently denied';
-        await _showPermanentlyDeniedDialog();
-        return;
-      }
-
-      if (geolocatorPermission == LocationPermission.whileInUse ||
-          geolocatorPermission == LocationPermission.always) {
-        locationPermissionGranted.value = true;
-        await _getCurrentLocation();
-        _showLocationGrantedMessage();
-      } else {
-        locationPermissionGranted.value = false;
-        currentLocation.value = 'Location permission denied';
-        _showPermissionDeniedMessage();
-      }
-    } catch (e) {
-      locationPermissionGranted.value = false;
-      currentLocation.value = 'Error accessing location: ${e.toString()}';
-      _showLocationErrorMessage(e.toString());
-    } finally {
-      isRequestingPermission.value = false;
-    }
-  }
-
-  // Get current location
-  Future<void> _getCurrentLocation() async {
-    try {
-      LocationSettings locationSettings = const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      );
-
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings,
-        timeLimit: const Duration(seconds: 30),
-      );
-
-      currentLatitude.value = position.latitude;
-      currentLongitude.value = position.longitude;
-      await _reverseGeocode(position.latitude, position.longitude);
-    } catch (e) {
-      try {
-        Position? lastPosition = await Geolocator.getLastKnownPosition();
-        if (lastPosition != null) {
-          currentLatitude.value = lastPosition.latitude;
-          currentLongitude.value = lastPosition.longitude;
-          await _reverseGeocode(lastPosition.latitude, lastPosition.longitude);
+        if (permission == LocationPermission.deniedForever) {
+          blocked = true;
+          failure = 'Location permission is blocked for this app.';
+        } else if (permission == LocationPermission.denied) {
+          failure = 'Location permission was denied.';
         } else {
-          throw Exception('No location data available');
+          final position = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: 10,
+            ),
+          ).timeout(const Duration(seconds: 20));
+          latitude = position.latitude;
+          longitude = position.longitude;
+          granted = true;
         }
-      } catch (lastLocationError) {
-        currentLocation.value = 'Error getting location: ${e.toString()}';
       }
+    } catch (_) {
+      failure = 'This device could not provide a location.';
     }
-  }
 
-  // Reverse geocoding
-  Future<void> _reverseGeocode(double latitude, double longitude) async {
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(latitude, longitude);
-      if (placemarks.isNotEmpty) {
-        final placemark = placemarks.first;
-        currentLocation.value = _formatAddress(placemark);
-      } else {
-        currentLocation.value =
-            'Location (${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)})';
-      }
-    } catch (e) {
+    permissionBlocked.value = blocked;
+
+    if (granted && latitude != null && longitude != null) {
+      currentLatitude.value = latitude;
+      currentLongitude.value = longitude;
       currentLocation.value =
           'Location (${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)})';
+      usingPickedArea.value = false;
+      locationPermissionGranted.value = true;
+      statusMessage.value = '';
+      await _reverseGeocode(latitude, longitude);
+    } else {
+      statusMessage.value =
+          '${failure ?? 'Location is unavailable.'} Pick an area below to keep using distance filters.';
+    }
+
+    isRequestingPermission.value = false;
+
+    if (granted) {
+      AppFeedback.success(
+        'Location found',
+        'Courts are now sorted by distance from you',
+      );
+    } else {
+      AppFeedback.warning('Location unavailable', failure);
     }
   }
 
-  // Format address from placemark
+  /// Re-read the device position for an already granted permission.
+  Future<void> updateLocation() async {
+    if (usingPickedArea.value) {
+      // Nothing to refresh for a manually picked area.
+      AppFeedback.info(
+        'Area location',
+        'You are browsing from ${currentLocation.value}',
+      );
+      return;
+    }
+    isUpdatingLocation.value = true;
+    await requestLocationPermission();
+    isUpdatingLocation.value = false;
+  }
+
+  /// Opens the OS settings page. Guarded because there is no web/desktop
+  /// implementation, and the old call site threw an uncaught UnimplementedError.
+  Future<void> openLocationSettings() async {
+    if (kIsWeb) {
+      AppFeedback.info(
+        'Not available here',
+        'Allow location from your browser address bar, or pick an area below.',
+      );
+      return;
+    }
+    try {
+      await Geolocator.openAppSettings();
+    } catch (_) {
+      AppFeedback.info(
+        'Settings unavailable',
+        'Open your system settings and allow location for PadelSystem.',
+      );
+    }
+  }
+
+  // Reverse geocoding (no-op fallback when the platform has no implementation)
+  Future<void> _reverseGeocode(double latitude, double longitude) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        currentLocation.value = _formatAddress(placemarks.first);
+      }
+    } catch (_) {
+      // Web/desktop have no geocoding plugin — the raw coordinates stay.
+    }
+  }
+
   String _formatAddress(Placemark placemark) {
     final parts = <String>[];
-    if (placemark.subLocality?.isNotEmpty == true)
+    if (placemark.subLocality?.isNotEmpty == true) {
       parts.add(placemark.subLocality!);
-    if (placemark.locality?.isNotEmpty == true)
+    }
+    if (placemark.locality?.isNotEmpty == true) {
       parts.add(placemark.locality!);
-    else if (placemark.administrativeArea?.isNotEmpty == true)
+    } else if (placemark.administrativeArea?.isNotEmpty == true) {
       parts.add(placemark.administrativeArea!);
+    }
     return parts.isNotEmpty ? parts.join(', ') : 'Current Location';
   }
 
-  // Calculate distance between two points
+  /// Distance in kilometres between two coordinates.
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000;
   }
 
-  // Update location manually
-  Future<void> updateLocation() async {
-    try {
-      isUpdatingLocation.value = true;
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        await _showLocationServiceDialog();
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        await _showPermanentlyDeniedDialog();
-        return;
-      }
-
-      if (permission == LocationPermission.denied) {
-        Get.snackbar(
-          'Permission Required',
-          'Location permission is required to update your location',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AColors.warning,
-          colorText: AColors.white,
-          margin: const EdgeInsets.all(16),
-        );
-        return;
-      }
-
-      locationPermissionGranted.value = true;
-      await _getCurrentLocation();
-      Get.snackbar(
-        'Location Updated',
-        'Your location has been updated to: ${currentLocation.value}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AColors.success,
-        colorText: AColors.white,
-        margin: const EdgeInsets.all(16),
-      );
-    } catch (e) {
-      Get.snackbar(
-        'Update Failed',
-        'Failed to update location: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AColors.error,
-        colorText: AColors.white,
-        margin: const EdgeInsets.all(16),
-      );
-    } finally {
-      isUpdatingLocation.value = false;
-    }
-  }
-
-  // Dialog methods
-  Future<bool> _showPermissionExplanationDialog() async {
-    return await Get.dialog<bool>(
-          AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Row(
-              children: [
-                Icon(Icons.location_on, color: AColors.primaryColor, size: 28),
-                const SizedBox(width: 12),
-                const Text('Location Access',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Padel Management System would like to access your location to provide you with better features:',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                _buildFeatureRow(Icons.near_me, 'Find nearby courts'),
-                const SizedBox(height: 12),
-                _buildFeatureRow(Icons.directions, 'Show distances to courts'),
-                const SizedBox(height: 12),
-                _buildFeatureRow(
-                    Icons.filter_list, 'Filter courts by distance'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(result: false),
-                child: const Text('Not Now',
-                    style: TextStyle(color: AColors.darkGrey, fontSize: 16)),
-              ),
-              ElevatedButton(
-                onPressed: () => Get.back(result: true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AColors.primaryColor,
-                  foregroundColor: AColors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text('Allow Location',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-          barrierDismissible: false,
-        ) ??
-        false;
-  }
-
-  Widget _buildFeatureRow(IconData icon, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: AColors.primaryColor, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-            child: Text(text,
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w500))),
-      ],
-    );
-  }
-
-  Future<void> _showLocationServiceDialog() async {
-    await Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.location_disabled, color: AColors.error, size: 28),
-            SizedBox(width: 12),
-            Text('Location Services Disabled',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: const Text(
-          'Location services are currently disabled on your device. Please enable location services in your device settings to use location-based features.',
-          style: TextStyle(fontSize: 15),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel',
-                style: TextStyle(color: AColors.darkGrey, fontSize: 16)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Get.back();
-              await Geolocator.openLocationSettings();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AColors.primaryColor,
-              foregroundColor: AColors.white,
-            ),
-            child: const Text('Open Settings',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  Future<void> _showPermanentlyDeniedDialog() async {
-    await Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.settings, color: AColors.warning, size: 28),
-            SizedBox(width: 12),
-            Text('Permission Required',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Location permission has been permanently denied.',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-            SizedBox(height: 8),
-            Text('To enable location features, please:',
-                style: TextStyle(fontSize: 15)),
-            SizedBox(height: 8),
-            Text(
-                '1. Go to App Settings\n2. Find Permissions\n3. Enable Location permission',
-                style: TextStyle(fontSize: 14, color: AColors.textsecondarry)),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel',
-                style: TextStyle(color: AColors.darkGrey, fontSize: 16)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Get.back();
-              await openAppSettings();
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AColors.primaryColor,
-                foregroundColor: AColors.white),
-            child: const Text('Open App Settings',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  // Message methods
-  void _showPermissionNotRequestedMessage() {
-    Get.snackbar(
-      'Permission Not Requested',
-      'Location permission was not requested. You can still browse courts.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AColors.info,
-      colorText: AColors.white,
-      duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.info_outline, color: AColors.white),
-    );
-  }
-
-  void _showLocationGrantedMessage() {
-    Get.snackbar(
-      'Location Access Granted',
-      'Now you can find nearby courts and see distances!',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AColors.success,
-      colorText: AColors.white,
-      duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.location_on, color: AColors.white),
-    );
-  }
-
-  void _showPermissionDeniedMessage() {
-    Get.snackbar(
-      'Location Permission Denied',
-      'You can still browse all courts, but nearby features won\'t be available',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AColors.warning,
-      colorText: AColors.white,
-      duration: const Duration(seconds: 4),
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.location_off, color: AColors.white),
-    );
-  }
-
-  void _showLocationErrorMessage(String error) {
-    Get.snackbar(
-      'Location Error',
-      'Failed to access location: $error',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AColors.error,
-      colorText: AColors.white,
-      duration: const Duration(seconds: 4),
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.error_outline, color: AColors.white),
-    );
-  }
-
-  // Status getters
+  // Status getters (rendered inline in the Nearest sheet)
   String get locationStatusText {
-    if (!locationServiceEnabled.value) return 'Location services disabled';
-    if (!locationPermissionGranted.value) return 'Location permission denied';
-    if (isUpdatingLocation.value) return 'Updating location...';
+    if (isRequestingPermission.value) return 'Locating you...';
+    if (!locationPermissionGranted.value) return 'Location not set';
     return currentLocation.value;
   }
 
   Color get locationStatusColor {
-    if (!locationServiceEnabled.value || !locationPermissionGranted.value)
-      return AColors.error;
-    if (isUpdatingLocation.value) return AColors.warning;
+    if (isRequestingPermission.value) return AColors.warning;
+    if (!locationPermissionGranted.value) return AColors.warning;
     return AColors.success;
   }
 
   IconData get locationStatusIcon {
-    if (!locationServiceEnabled.value) return Icons.location_disabled;
-    if (!locationPermissionGranted.value) return Icons.location_off;
-    if (isUpdatingLocation.value) return Icons.location_searching;
-    return Icons.location_on;
+    if (isRequestingPermission.value) return Icons.location_searching_rounded;
+    if (!locationPermissionGranted.value) return Icons.location_off_rounded;
+    return Icons.location_on_rounded;
   }
 
-  // Get formatted distance
   String getFormattedDistance(double distance) {
     if (distance < 1) {
-      return '${(distance * 1000).round()}m';
-    } else {
-      return '${distance.toStringAsFixed(1)}km';
+      return '${(distance * 1000).round()} m';
     }
+    return '${distance.toStringAsFixed(1)} km';
   }
 }

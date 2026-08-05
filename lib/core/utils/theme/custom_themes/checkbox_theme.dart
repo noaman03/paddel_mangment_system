@@ -3,39 +3,24 @@ import 'package:padel_management_system/core/const/colors.dart';
 
 class ACheckboxtheme {
   ACheckboxtheme._();
+
   static CheckboxThemeData lightCheckboxTheme = CheckboxThemeData(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-    checkColor: WidgetStateProperty.resolveWith((States) {
-      if (States.contains(WidgetState.selected)) {
-        return Colors.white;
-      } else {
-        return Colors.black;
-      }
-    }),
-    fillColor: WidgetStateProperty.resolveWith((States) {
-      if (States.contains(WidgetState.selected)) {
-        return AColors.primaryColor;
-      } else {
-        return Colors.transparent;
-      }
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+    side: const BorderSide(color: AColors.borderPrimary, width: 1.6),
+    checkColor: const WidgetStatePropertyAll<Color>(AColors.white),
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) return AColors.primaryColor;
+      return Colors.transparent;
     }),
   );
 
   static CheckboxThemeData darkCheckboxTheme = CheckboxThemeData(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-    checkColor: WidgetStateProperty.resolveWith((States) {
-      if (States.contains(WidgetState.selected)) {
-        return Colors.white;
-      } else {
-        return Colors.black;
-      }
-    }),
-    fillColor: WidgetStateProperty.resolveWith((States) {
-      if (States.contains(WidgetState.selected)) {
-        return AColors.primaryColor;
-      } else {
-        return Colors.transparent;
-      }
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+    side: const BorderSide(color: AColors.borderDark, width: 1.6),
+    checkColor: const WidgetStatePropertyAll<Color>(AColors.white),
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) return AColors.primaryColor;
+      return Colors.transparent;
     }),
   );
 }

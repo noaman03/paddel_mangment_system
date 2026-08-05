@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/continue_data.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_data/userdata_continue.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_data/userdata_form.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/widgets/user_data/userdata_header.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
-import 'package:padel_management_system/core/const/text_strings.dart';
 import 'package:padel_management_system/core/widgets/background_decoration.dart';
 
 class UserData extends StatefulWidget {
@@ -19,69 +18,87 @@ class UserData extends StatefulWidget {
 }
 
 class _UserDataState extends State<UserData> {
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Registered once here rather than inside both children's build methods:
+    // the form and the Continue button must observe the *same* instance.
+    Get.put(ContinueDataController());
+  }
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    Get.delete<ContinueDataController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final dark = ADeviceutils.isDarkMode(context);
-    final size = MediaQuery.of(context).size;
+    final c = context.padel;
+
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: dark ? AColors.light : AColors.dark,
-              ),
-              onPressed: () => Get.back()),
+      backgroundColor: c.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          tooltip: 'Back',
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          onPressed: () => Get.back(),
         ),
-        body: SizedBox(
-          height: size.height,
-          width: size.width,
-          child: Stack(children: [
-            // Background decorative elements - Full screen
-            Positioned.fill(
-              child: buildBackgroundDecoration(dark),
-            ),
-            SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Progress indicator
-                      const UserdataHeader(),
+      ),
+      body: Stack(
+        children: [
+          // The helper returns a bare Stack; the fill wrapper belongs here.
+          Positioned.fill(child: buildBackgroundDecoration(c.isDark)),
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(
+                horizontal: ASizes.paddingLg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Progress indicator + titles
+                  const UserdataHeader(),
 
-                      // First and Last Name Row
-                      UserDataForm(
-                        firstNameController: firstNameController,
-                        lastNameController: lastNameController,
-                        phoneController: phoneController,
-                        passwordController: passwordController,
-                        confirmPasswordController: confirmPasswordController,
-                      ),
-                      const SizedBox(height: ASizes.spaceBtwSections),
-
-                      // Continue Button
-                      ContinueData(
-                        emailController: widget.email,
-                        firstNameController: firstNameController,
-                        lastNameController: lastNameController,
-                        phoneController: phoneController,
-                        passwordController: passwordController,
-                        confirmPasswordController: confirmPasswordController,
-                      ),
-                    ],
+                  UserDataForm(
+                    firstNameController: firstNameController,
+                    lastNameController: lastNameController,
+                    phoneController: phoneController,
+                    passwordController: passwordController,
+                    confirmPasswordController: confirmPasswordController,
                   ),
-                ),
+                  const SizedBox(height: ASizes.spaceBtwSections),
+
+                  ContinueData(
+                    emailController: widget.email,
+                    firstNameController: firstNameController,
+                    lastNameController: lastNameController,
+                    phoneController: phoneController,
+                    passwordController: passwordController,
+                    confirmPasswordController: confirmPasswordController,
+                  ),
+                  const SizedBox(height: ASizes.spaceBtwSections),
+                ],
               ),
             ),
-          ]),
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }

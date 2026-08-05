@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:padel_management_system/Features/auth/presentation/login/widgets/demo_accounts_card.dart';
 import 'package:padel_management_system/Features/auth/presentation/login/widgets/divide_socialbutton.dart';
 import 'package:padel_management_system/Features/auth/presentation/login/widgets/login_form.dart';
 import 'package:padel_management_system/Features/auth/presentation/login/widgets/login_header.dart';
@@ -7,6 +9,7 @@ import 'package:padel_management_system/Features/auth/presentation/login/widgets
 import 'package:padel_management_system/core/const/sizes.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/text_strings.dart';
+import 'package:padel_management_system/core/controllers/theme_controller.dart';
 import 'package:padel_management_system/core/widgets/background_decoration.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -82,8 +85,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // Background decorative elements
-          buildBackgroundDecoration(isDark),
+          // Background decorative elements. The helper returns a bare Stack,
+          // so positioning belongs to the caller.
+          Positioned.fill(child: buildBackgroundDecoration(isDark)),
+
+          // Appearance toggle — dark mode is otherwise only reachable by
+          // changing the operating-system setting.
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 12,
+            child: const _AppearanceToggle(),
+          ),
 
           // Main content
           SafeArea(
@@ -133,6 +145,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     : ASizes.spaceBtwSections,
                               ),
 
+                              // Demo account shortcuts — the reviewer should
+                              // never have to guess or type the credentials.
+                              if (!isKeyboardVisible) ...[
+                                DemoAccountsCard(
+                                  emailController: emailController,
+                                  passwordController: passwordController,
+                                ),
+                                const SizedBox(height: ASizes.spaceBtwItems),
+                              ],
+
                               // OR divider & social login buttons (hide when keyboard is open)
                               if (!isKeyboardVisible) ...[
                                 const DividerSocialButtons(),
@@ -159,6 +181,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Compact System → Light → Dark cycler shown on the login screen.
+class _AppearanceToggle extends StatelessWidget {
+  const _AppearanceToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.padel;
+    final controller = ThemeController.to;
+
+    return Obx(
+      () => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: controller.cycle,
+          borderRadius: BorderRadius.circular(30),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: c.surface,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: c.border),
+              boxShadow: [
+                BoxShadow(
+                  color: c.shadow,
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(controller.icon, size: 16, color: c.brandText),
+                const SizedBox(width: 6),
+                Text(
+                  controller.label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: c.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/route_manager.dart';
-import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/Features/auth/data/demo_accounts.dart';
 import 'package:padel_management_system/Features/owner/dashboard/owner_dashboard.dart';
+import 'package:padel_management_system/core/const/colors.dart';
+import 'package:padel_management_system/core/const/sizes.dart';
+import 'package:padel_management_system/core/controllers/session_controller.dart';
+import 'package:padel_management_system/core/utils/feedback/app_feedback.dart';
 
+/// Standalone sign-in for the court-owner panel.
+///
+/// It now shares its credentials with the rest of the app ([DemoAccounts.owner])
+/// and signs the session in, so the dashboard, the drawer and the login screen's
+/// demo-account card all agree on who is logged in.
 class OwnerLoginScreen extends ConsumerStatefulWidget {
   const OwnerLoginScreen({super.key});
 
@@ -12,10 +21,14 @@ class OwnerLoginScreen extends ConsumerStatefulWidget {
 }
 
 class _OwnerLoginScreenState extends ConsumerState<OwnerLoginScreen> {
-  late TextEditingController _emailController;
-  late TextEditingController _passwordController;
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  static const DemoAccount _account = DemoAccounts.owner;
 
   @override
   void initState() {
@@ -25,235 +38,312 @@ class _OwnerLoginScreenState extends ConsumerState<OwnerLoginScreen> {
   }
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    bool dark = Theme.of(context).brightness == Brightness.dark;
+    final c = context.padel;
+    final canPop = Navigator.of(context).canPop();
 
     return Scaffold(
-      backgroundColor: dark ? Colors.grey[900] : Colors.grey[50],
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 80),
-
-              // Logo & Title
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AColors.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.business,
-                        size: 48,
-                        color: AColors.primaryColor,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Court Owner Portal',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Manage your padel courts',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: Colors.grey),
-                    ),
-                  ],
+      backgroundColor: c.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        // Without this the user who taps through to the owner portal and
+        // changes their mind is trapped on every platform but Android.
+        leading: canPop
+            ? IconButton(
+                tooltip: 'Back',
+                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+              )
+            : null,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  ASizes.lg,
+                  ASizes.sm,
+                  ASizes.lg,
+                  ASizes.xl,
                 ),
-              ),
-              const SizedBox(height: 48),
-
-              // Email field
-              Text(
-                'Email',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your email',
-                  prefixIcon:
-                      const Icon(Icons.email, color: AColors.primaryColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Password field
-              Text(
-                'Password',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  prefixIcon:
-                      const Icon(Icons.lock, color: AColors.primaryColor),
-                  suffixIcon: GestureDetector(
-                    onTap: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    },
-                    child: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: AColors.primaryColor,
-                    ),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Forgot password
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(color: AColors.primaryColor),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Login button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AColors.primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    disabledBackgroundColor: Colors.grey[300],
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                            strokeWidth: 2,
+                shrinkWrap: true,
+                children: [
+                  Center(
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: AColors.brandGradient,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AColors.primaryColor
+                                    .withValues(alpha: 0.32),
+                                blurRadius: 22,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
                           ),
-                        )
-                      : const Text(
-                          'Login',
-                          style: TextStyle(
+                          child: const Icon(
+                            Icons.storefront_rounded,
+                            size: 42,
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Demo info
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Demo Credentials:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        const SizedBox(height: ASizes.lg),
+                        Text(
+                          'Court Owner Portal',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Manage your courts, bookings and tournaments',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: c.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: ASizes.xl),
+                  TextFormField(
+                    controller: _emailController,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.username],
+                    decoration: const InputDecoration(
+                      labelText: 'Email or username',
+                      hintText: 'owner',
+                      prefixIcon: Icon(Icons.person_outline_rounded),
+                    ),
+                    validator: (value) => (value?.trim().isEmpty ?? true)
+                        ? 'Enter your email or username'
+                        : null,
+                  ),
+                  const SizedBox(height: ASizes.md),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onFieldSubmitted: (_) => _login(),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'owner',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      suffixIcon: IconButton(
+                        tooltip: _obscurePassword
+                            ? 'Show password'
+                            : 'Hide password',
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_rounded
+                              : Icons.visibility_rounded,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Email: owner\nPassword: owner',
-                      style: TextStyle(fontSize: 12),
+                    validator: (value) => (value?.trim().isEmpty ?? true)
+                        ? 'Enter your password'
+                        : null,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _showPasswordHelp,
+                      child: const Text('Forgot password?'),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: ASizes.sm),
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _login,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Sign in'),
+                    ),
+                  ),
+                  const SizedBox(height: ASizes.lg),
+                  _DemoCredentialsCard(
+                    account: _account,
+                    onFill: _fillDemoCredentials,
+                  ),
+                ],
               ),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  void _login() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    // Simple demo validation
-    if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please fill all fields');
-      return;
-    }
-
-    // Demo owner login check
-    if (email.toLowerCase() == 'owner' && password.toLowerCase() == 'owner') {
-      setState(() => _isLoading = true);
-
-      // Simulate login delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() => _isLoading = false);
-
-      // Navigate to owner dashboard
-      Get.offAll(() => const OwnerDashboard());
-    } else {
-      _showSnackBar('Invalid credentials. Try: owner/owner');
-    }
+  void _fillDemoCredentials() {
+    setState(() {
+      _emailController.text = _account.email;
+      _passwordController.text = _account.password;
+    });
+    AppFeedback.info('Demo credentials filled', 'Tap Sign in to continue.');
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 2),
-      ),
+  void _showPasswordHelp() {
+    AppFeedback.info(
+      'Password reset is off in the demo',
+      'This build has no backend — use owner / owner to sign in.',
     );
   }
 
+  Future<void> _login() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    if (!_account.matches(email, password)) {
+      AppFeedback.error(
+        'Those credentials did not work',
+        'Use ${_account.email} / ${_account.password} for the owner demo.',
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    // 600ms matches the delay LoginController uses; this used to wait 2s.
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    SessionController.to.signIn(_account);
+    Get.offAll(() => const OwnerDashboard());
+    AppFeedback.success(
+      'Welcome back',
+      'Signed in as ${_account.displayName}.',
+    );
+  }
+}
+
+class _DemoCredentialsCard extends StatelessWidget {
+  const _DemoCredentialsCard({required this.account, required this.onFill});
+
+  final DemoAccount account;
+  final VoidCallback onFill;
+
   @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    final c = context.padel;
+    final tone = account.role.color;
+
+    return Container(
+      padding: const EdgeInsets.all(ASizes.md),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(ASizes.cardRadiusLg),
+        border: Border.all(color: c.border),
+        boxShadow: [
+          BoxShadow(
+              color: c.shadow, blurRadius: 14, offset: const Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: c.soft(tone),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  account.role.icon,
+                  size: 19,
+                  color: c.onSurfaceAccent(tone),
+                ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Demo account',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        color: c.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      account.description,
+                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: ASizes.sm + 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: c.fill,
+              borderRadius: BorderRadius.circular(ASizes.borderRadiusMd),
+              border: Border.all(color: c.border),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${account.email}  /  ${account.password}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                      color: c.textPrimary,
+                    ),
+                  ),
+                ),
+                TextButton(onPressed: onFill, child: const Text('Fill')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

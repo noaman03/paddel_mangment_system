@@ -8,19 +8,19 @@ class AElevatedButtonTheme {
       ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       elevation: 0,
-      backgroundColor: AColors.primaryColor,
-      foregroundColor: Colors.white,
-      disabledBackgroundColor: Colors.grey,
-      disabledForegroundColor: Colors.grey,
+      // The accent green is too light to carry white text (1.91:1); the deep
+      // brand green clears 4.5:1 while still reading as the same brand.
+      backgroundColor: AColors.primaryDeep,
+      foregroundColor: AColors.white,
+      disabledBackgroundColor: AColors.borderPrimary,
+      disabledForegroundColor: AColors.darkGrey,
       textStyle: const TextStyle(
         fontSize: 16.0,
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
       ),
-      side: const BorderSide(color: AColors.primaryColor),
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(14.0),
       ),
     ),
   );
@@ -29,19 +29,19 @@ class AElevatedButtonTheme {
       ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       elevation: 0,
-      backgroundColor: AColors.primaryColor,
-      foregroundColor: Colors.white,
-      disabledBackgroundColor: Colors.grey,
-      disabledForegroundColor: Colors.grey,
+      // The accent green is too light to carry white text (1.91:1); the deep
+      // brand green clears 4.5:1 while still reading as the same brand.
+      backgroundColor: AColors.primaryDeep,
+      foregroundColor: AColors.white,
+      disabledBackgroundColor: AColors.borderDark,
+      disabledForegroundColor: AColors.grey,
       textStyle: const TextStyle(
         fontSize: 16.0,
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
       ),
-      side: const BorderSide(color: AColors.primaryColor),
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(14.0),
       ),
     ),
   );

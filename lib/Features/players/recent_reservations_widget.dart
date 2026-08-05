@@ -1,37 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:padel_management_system/Features/players/court_details/court_details_screen.dart';
+import 'package:padel_management_system/Features/players/reservations/my_reservations_screen.dart';
+import 'package:padel_management_system/Models/booking_model.dart';
+import 'package:padel_management_system/core/Service/reservations/reservation_store.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
-import 'package:padel_management_system/Features/players/reservations/my_reservations_screen.dart';
-import 'package:padel_management_system/Features/players/court_details/court_details_screen.dart';
-import 'package:padel_management_system/Models/padel_court.dart';
+import 'package:padel_management_system/core/utils/feedback/app_feedback.dart';
+import 'package:padel_management_system/core/utils/formatters/formatter.dart';
 
-class RecentReservationsWidget extends ConsumerStatefulWidget {
+/// Horizontal carousel of the player's latest reservations on the home screen.
+class RecentReservationsWidget extends StatelessWidget {
   const RecentReservationsWidget({super.key});
 
   @override
-  ConsumerState<RecentReservationsWidget> createState() =>
-      _RecentReservationsWidgetState();
-}
-
-class _RecentReservationsWidgetState
-    extends ConsumerState<RecentReservationsWidget> {
-  late List<RecentReservation> _reservations;
-
-  @override
-  void initState() {
-    super.initState();
-    _reservations = _getDummyReservations();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    bool dark = Theme.of(context).brightness == Brightness.dark;
+    final c = context.padel;
+    final store = ReservationStore.to;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -45,324 +34,391 @@ class _RecentReservationsWidgetState
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyReservationsScreen(),
-                    ),
-                  );
-                },
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyReservationsScreen(),
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  // The plain brand green was ~1.9:1 on the white page.
+                  foregroundColor: c.onSurfaceAccent(AColors.primaryDark),
+                  backgroundColor: c.primarySoft,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: ASizes.md,
+                    vertical: 6,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
                 child: const Text(
                   'View All',
-                  style: TextStyle(color: AColors.primaryColor),
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-
-        // Reservations List
         SizedBox(
-          height: 320,
-          child: _reservations.isEmpty
-              ? Center(
-                  child: Text(
-                    'No recent reservations',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: Colors.grey),
-                  ),
-                )
-              : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: _reservations.length,
-                  itemBuilder: (context, index) {
-                    final reservation = _reservations[index];
-                    return _buildReservationCard(context, reservation, dark);
-                  },
+          height: 300,
+          child: Obx(() {
+            final bookings = store.recent(limit: 6);
+            if (bookings.isEmpty) {
+              return Center(
+                child: Text(
+                  'No recent reservations',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: c.textSecondary),
                 ),
+              );
+            }
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: bookings.length,
+              itemBuilder: (context, index) =>
+                  _ReservationCard(booking: bookings[index]),
+            );
+          }),
         ),
       ],
     );
   }
+}
 
-  Widget _buildReservationCard(
-      BuildContext context, RecentReservation reservation, bool dark) {
-    return GestureDetector(
-      onTap: () {
-        // Create dummy court object and navigate to details screen
-        final court = PadelCourt(
-          id: reservation.id,
-          name: reservation.courtName,
-          location: reservation.location,
-          description: 'Premium padel court with excellent facilities',
-          pricePerHour: 250.0,
-          photos: [reservation.courtImage],
-          facilities: [
-            'Air Conditioning',
-            'Professional Lighting',
-            'Cafe',
-            'Parking'
-          ],
-          type: CourtType.indoor,
-          rating: 4.8,
-          totalBookings: 150,
-          createdAt: DateTime.now(),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CourtDetailsScreen(court: court),
-          ),
-        );
-      },
-      child: Container(
-        width: 280,
-        margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          color: dark ? Colors.grey[800] : Colors.white,
-          borderRadius: BorderRadius.circular(ASizes.borderRadiusLg),
-          border: Border.all(
-            color: dark ? Colors.grey[700]! : Colors.grey[300]!,
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(dark ? 0.3 : 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Court Image
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
+class _ReservationCard extends StatelessWidget {
+  const _ReservationCard({required this.booking});
+
+  final Booking booking;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.padel;
+    final text = Theme.of(context).textTheme;
+    final court = ReservationStore.courtFor(booking);
+    final image = court?.image ?? booking.courtImage;
+    final upcoming = booking.effectiveStatus == BookingStatus.confirmed;
+
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(ASizes.cardRadiusLg),
+        border: Border.all(color: c.border),
+        boxShadow: [
+          BoxShadow(
+              color: c.shadow, blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(ASizes.cardRadiusLg),
+          onTap: () => _openCourt(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(ASizes.borderRadiusLg),
+                  top: Radius.circular(ASizes.cardRadiusLg),
                 ),
-                color: Colors.grey[300],
-                image: DecorationImage(
-                  image: NetworkImage(reservation.courtImage),
-                  fit: BoxFit.cover,
-                  onError: (_, __) {},
-                ),
-              ),
-              child: reservation.courtImage.isEmpty
-                  ? Container(
-                      color: Colors.grey[300],
-                      child: Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  : null,
-            ),
-
-            // Court Details
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(ASizes.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      reservation.courtName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: ASizes.fontSizeSm,
-                        fontWeight: FontWeight.bold,
-                        color: dark ? Colors.white : AColors.textprimary,
-                      ),
-                    ),
-                    const SizedBox(height: ASizes.xs),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 12,
-                          color: Colors.grey,
+                child: SizedBox(
+                  height: 104,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (image.isEmpty)
+                        const _CourtImageFallback()
+                      else
+                        Image.network(
+                          image,
+                          fit: BoxFit.cover,
+                          // Demo images are remote: without these the offline
+                          // build shows a red error box.
+                          errorBuilder: (_, __, ___) =>
+                              const _CourtImageFallback(),
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return const _CourtImageFallback(loading: true);
+                          },
                         ),
-                        const SizedBox(width: ASizes.xs),
-                        Expanded(
-                          child: Text(
-                            reservation.location,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: dark ? Colors.grey[400] : Colors.grey[600],
-                            ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.02),
+                              Colors.black.withValues(alpha: 0.42),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: ASizes.xs),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: ASizes.xs,
-                        vertical: 2,
                       ),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(reservation.status)
-                            .withOpacity(0.2),
-                        borderRadius:
-                            BorderRadius.circular(ASizes.borderRadiusSm),
-                      ),
-                      child: Text(
-                        reservation.status,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: _getStatusColor(reservation.status),
+                      Positioned(
+                        left: ASizes.sm,
+                        bottom: ASizes.sm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: ASizes.sm,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.92),
+                            borderRadius:
+                                BorderRadius.circular(ASizes.borderRadiusSm),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.sports_tennis_rounded,
+                                size: 13,
+                                color: AColors.primaryDark,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                AFormatter.formatCurrency(booking.totalPrice),
+                                style: const TextStyle(
+                                  color: AColors.textprimary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: ASizes.xs),
-                    Text(
-                      '${reservation.date} at ${reservation.time}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: dark ? Colors.grey[400] : Colors.grey[600],
+                      Positioned(
+                        right: ASizes.sm,
+                        top: ASizes.sm,
+                        child: _StatusBadge(status: booking.effectiveStatus),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Rebook Button
-            Padding(
-              padding: const EdgeInsets.all(ASizes.sm),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Rebook court
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Rebooking court...'),
-                        backgroundColor: AColors.primaryColor,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AColors.primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(ASizes.borderRadiusMd),
-                    ),
-                  ),
-                  child: const Text(
-                    'Rebook',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    ASizes.sm,
+                    ASizes.sm,
+                    ASizes.sm,
+                    0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        booking.courtName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: ASizes.xs),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on, size: 13, color: c.textMuted),
+                          const SizedBox(width: ASizes.xs),
+                          Expanded(
+                            child: Text(
+                              booking.courtLocation,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: c.textSecondary),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: ASizes.xs),
+                      Row(
+                        children: [
+                          Icon(Icons.schedule, size: 13, color: c.textMuted),
+                          const SizedBox(width: ASizes.xs),
+                          Expanded(
+                            child: Text(
+                              '${AFormatter.formatDayMonth(booking.bookingDate)} · '
+                              '${Booking.formatTime(booking.startTime)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: c.textSecondary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(ASizes.sm),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (upcoming) {
+                        _openReservations(context);
+                      } else {
+                        _openCourt(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          upcoming ? c.surfaceElevated : AColors.primaryDark,
+                      foregroundColor: upcoming ? c.textPrimary : Colors.white,
+                      elevation: upcoming ? 0 : 1,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        side: upcoming
+                            ? BorderSide(color: c.border)
+                            : BorderSide.none,
+                        borderRadius:
+                            BorderRadius.circular(ASizes.borderRadiusMd),
+                      ),
+                    ),
+                    icon: Icon(
+                      upcoming
+                          ? Icons.event_available_rounded
+                          : Icons.refresh_rounded,
+                      size: 16,
+                    ),
+                    label: Text(
+                      upcoming ? 'View booking' : 'Rebook',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
-      case 'upcoming':
-        return AColors.primaryColor;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+  void _openReservations(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const MyReservationsScreen()),
+    );
   }
 
-  List<RecentReservation> _getDummyReservations() {
-    return [
-      RecentReservation(
-        id: '1',
-        courtName: 'Al Noor Club',
-        location: 'Downtown Cairo',
-        date: 'Jan 15, 2025',
-        time: '5:00 PM',
-        status: 'Completed',
-        courtImage: 'https://via.placeholder.com/280x100?text=Al+Noor+Club',
+  /// Opens the *real* court from the catalogue instead of synthesising one with
+  /// an invented 250/hour price and a canned facilities list.
+  void _openCourt(BuildContext context) {
+    final court = ReservationStore.courtFor(booking);
+    if (court == null) {
+      AppFeedback.warning(
+        'Court unavailable',
+        '${booking.courtName} is no longer listed in the demo catalogue.',
+      );
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CourtDetailsScreen(court: court.toPadelCourt()),
       ),
-      RecentReservation(
-        id: '2',
-        courtName: 'Al Ahmar Club',
-        location: 'New Cairo',
-        date: 'Jan 20, 2025',
-        time: '6:00 PM',
-        status: 'Upcoming',
-        courtImage: 'https://via.placeholder.com/280x100?text=Al+Ahmar+Club',
-      ),
-      RecentReservation(
-        id: '3',
-        courtName: 'Athletes Club',
-        location: 'Giza',
-        date: 'Jan 10, 2025',
-        time: '4:00 PM',
-        status: 'Completed',
-        courtImage: 'https://via.placeholder.com/280x100?text=Athletes+Club',
-      ),
-      RecentReservation(
-        id: '4',
-        courtName: 'Alexandria Courts',
-        location: 'Alexandria',
-        date: 'Jan 5, 2025',
-        time: '7:00 PM',
-        status: 'Completed',
-        courtImage:
-            'https://via.placeholder.com/280x100?text=Alexandria+Courts',
-      ),
-      RecentReservation(
-        id: '5',
-        courtName: 'Al Noor Club',
-        location: 'وسط البلد - Downtown',
-        date: '25 يناير 2025',
-        time: '5:30 PM',
-        status: 'Upcoming',
-        courtImage: 'https://via.placeholder.com/280x100?text=Al+Noor+Club2',
-      ),
-    ];
+    );
   }
 }
 
-class RecentReservation {
-  final String id;
-  final String courtName;
-  final String location;
-  final String date;
-  final String time;
-  final String status;
-  final String courtImage;
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status});
 
-  RecentReservation({
-    required this.id,
-    required this.courtName,
-    required this.location,
-    required this.date,
-    required this.time,
-    required this.status,
-    required this.courtImage,
-  });
+  final BookingStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color tone;
+    switch (status) {
+      case BookingStatus.confirmed:
+      case BookingStatus.pending:
+        tone = AColors.primaryDark;
+        break;
+      case BookingStatus.completed:
+        tone = AColors.success;
+        break;
+      case BookingStatus.cancelled:
+        tone = AColors.error;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: tone,
+        borderRadius: BorderRadius.circular(ASizes.borderRadiusSm),
+      ),
+      child: Text(
+        status.label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+/// Branded stand-in for a court photo that failed to load (or is still
+/// loading) — the offline demo has no bundled court imagery.
+class _CourtImageFallback extends StatelessWidget {
+  const _CourtImageFallback({this.loading = false});
+
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF21D982), Color(0xFF078351)],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -18,
+            top: -20,
+            child: Icon(
+              Icons.sports_tennis_rounded,
+              size: 100,
+              color: Colors.white.withValues(alpha: 0.14),
+            ),
+          ),
+          Center(
+            child: loading
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Icon(
+                    Icons.sports_tennis_rounded,
+                    size: 32,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }

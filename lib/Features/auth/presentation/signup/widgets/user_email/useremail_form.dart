@@ -1,35 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:padel_management_system/core/const/colors.dart';
-import 'package:padel_management_system/core/const/text_strings.dart';
 
 class UserEmailForm extends StatelessWidget {
-  const UserEmailForm({
-    super.key,
-    required this.emailController,
-  });
+  const UserEmailForm({super.key, required this.emailController});
 
   final TextEditingController emailController;
 
   @override
   Widget build(BuildContext context) {
-    bool dark = ADeviceutils.isDarkMode(context);
+    // Fill, hint and icon colours come from `inputDecorationTheme`. They used
+    // to be hand-rolled here with the hint painted the same colour as the
+    // typed text, so the field looked pre-filled.
     return TextField(
       controller: emailController,
       keyboardType: TextInputType.emailAddress,
-      style:
-          TextStyle(fontSize: 16, color: dark ? AColors.light : AColors.dark),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: dark ? AColors.containerDark : AColors.containerLight,
+      textInputAction: TextInputAction.done,
+      autocorrect: false,
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 16),
+      decoration: const InputDecoration(
         hintText: 'Your email address',
-        hintStyle: TextStyle(
-          color: dark ? AColors.light : AColors.dark,
-          fontSize: 16,
-        ),
-        prefixIcon: Icon(
-          Icons.email_outlined,
-          color: dark ? AColors.light : AColors.dark,
-        ),
+        prefixIcon: Icon(Icons.email_outlined, size: 20),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       ),
     );
   }

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 
 class SignUpHeader extends StatelessWidget {
-  const SignUpHeader({
-    super.key,
-  });
+  const SignUpHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = context.padel;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -16,31 +16,37 @@ class SignUpHeader extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: AColors.primaryColor.withOpacity(0.1),
+              color: c.primarySoft,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.sports_tennis,
               size: 40,
-              color: AColors.primaryColor,
+              color: c.brandText,
             ),
           ),
         ),
         const SizedBox(height: 30),
-        // Welcome Text
-        Text('Get Started with',
-            style: Theme.of(context).textTheme.displayMedium),
+
+        // Welcome text
+        Text(
+          'Get Started with',
+          style: Theme.of(context).textTheme.displayMedium,
+        ),
         Text(
           'Padelit',
           style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              color: AColors.primaryColor, fontWeight: FontWeight.w600),
+                color: c.brandText,
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 12),
         Text(
           'Enter your email to continue',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge
+              ?.copyWith(color: c.textSecondary),
         ),
       ],
     );

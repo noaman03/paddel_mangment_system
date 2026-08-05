@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/controller/continue_data.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
 import 'package:padel_management_system/core/widgets/name_textfield.dart';
 import 'package:padel_management_system/core/widgets/password_requirements.dart';
 
 class UserDataForm extends StatelessWidget {
-  UserDataForm({
+  const UserDataForm({
     super.key,
     required this.firstNameController,
     required this.lastNameController,
@@ -15,21 +16,25 @@ class UserDataForm extends StatelessWidget {
     required this.confirmPasswordController,
   });
 
-  final controller = Get.put(ContinueDataController());
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
   final TextEditingController phoneController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    // Registered once by _UserDataState.initState — a Get.put here would have
+    // handed the Continue button a different instance.
+    final controller = Get.find<ContinueDataController>();
+
     return Form(
-      key: _formKey,
+      // The key lives on the controller so the Continue button can trigger the
+      // inline errors for fields the user never touched.
+      key: controller.formKey,
       child: Column(
         children: [
-          // First Name and Last Name Row
+          // First and last name
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -52,109 +57,122 @@ class UserDataForm extends StatelessWidget {
           ),
           const SizedBox(height: ASizes.spaceBtwInputFields),
 
-          // Phone Number Field
+          // Phone number
           PhoneTextField(
             controller: phoneController,
             validator: controller.validatePhone,
           ),
           const SizedBox(height: ASizes.spaceBtwInputFields),
 
-          // Password Field with Strength Indicator
+          // Password + strength meter
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => PasswordTextField(
-                    controller: passwordController,
-                    hintText: 'Create password',
-                    obscureText: controller.isObscure.value,
-                    onToggleVisibility: controller.togglePasswordVisibility,
-                    validator: controller.validatePassword,
-                    onChanged: controller.updatePassword,
-                  )),
+              Obx(
+                () => PasswordTextField(
+                  controller: passwordController,
+                  hintText: 'Create password',
+                  obscureText: controller.isObscure.value,
+                  onToggleVisibility: controller.togglePasswordVisibility,
+                  validator: controller.validatePassword,
+                  onChanged: controller.updatePassword,
+                ),
+              ),
               const SizedBox(height: 8),
-              Obx(() => buildPasswordStrengthIndicator()),
+              Obx(() => _PasswordStrengthBar(
+                    password: controller.currentPassword.value,
+                    strength: controller.passwordStrength,
+                  )),
             ],
           ),
           const SizedBox(height: ASizes.spaceBtwInputFields),
 
-          // Confirm Password Field
-          Obx(() => PasswordTextField(
-                controller: confirmPasswordController,
-                hintText: 'Confirm password',
-                obscureText: controller.isConfirmObscure.value,
-                onToggleVisibility: controller.toggleConfirmPasswordVisibility,
-                validator: (value) => controller.validateConfirmPassword(
-                    value, passwordController.text),
-                onChanged: controller.updateConfirmPassword,
-                additionalSuffixIcon:
-                    controller.currentConfirmPassword.value.isNotEmpty
-                        ? Icon(
-                            controller.passwordsMatch
-                                ? Icons.check_circle
-                                : Icons.cancel,
-                            color: controller.passwordsMatch
-                                ? Colors.green
-                                : Colors.red,
-                            size: 20,
-                          )
-                        : null,
-              )),
+          // Confirm password
+          Obx(
+            () => PasswordTextField(
+              controller: confirmPasswordController,
+              hintText: 'Confirm password',
+              obscureText: controller.isConfirmObscure.value,
+              onToggleVisibility: controller.toggleConfirmPasswordVisibility,
+              validator: (value) => controller.validateConfirmPassword(
+                  value, passwordController.text),
+              onChanged: controller.updateConfirmPassword,
+              additionalSuffixIcon:
+                  controller.currentConfirmPassword.value.isEmpty
+                      ? null
+                      : Icon(
+                          controller.passwordsMatch
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: controller.passwordsMatch
+                              ? AColors.success
+                              : AColors.error,
+                          size: 20,
+                        ),
+            ),
+          ),
           const SizedBox(height: ASizes.spaceBtwItems),
 
-          // Password Requirements
-          const PasswordRequirements(),
+          // Pass the live password so the rules tick off as the user types.
+          Obx(
+            () => PasswordRequirements(
+              password: controller.currentPassword.value,
+            ),
+          ),
         ],
       ),
     );
   }
+}
 
-  bool validateForm() {
-    return _formKey.currentState?.validate() ?? false;
-  }
+class _PasswordStrengthBar extends StatelessWidget {
+  const _PasswordStrengthBar({required this.password, required this.strength});
 
-  Widget buildPasswordStrengthIndicator() {
-    final strength = controller.passwordStrength;
-    final strengthText = ['Weak', 'Fair', 'Good', 'Strong'];
-    final strengthColors = [
-      Colors.red,
-      Colors.orange,
-      Colors.blue,
-      Colors.green
-    ];
+  final String password;
+  final int strength;
 
-    if (controller.currentPassword.value.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  static const List<String> _labels = ['Weak', 'Fair', 'Good', 'Strong'];
+  static const List<Color> _tones = [
+    AColors.error,
+    AColors.warning,
+    AColors.info,
+    AColors.success,
+  ];
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: (strength + 1) / 4,
-                  backgroundColor: Colors.grey.shade300,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(strengthColors[strength]),
-                  minHeight: 4,
-                ),
+  @override
+  Widget build(BuildContext context) {
+    if (password.isEmpty) return const SizedBox.shrink();
+
+    final c = context.padel;
+    final tone = _tones[strength];
+
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 300),
+              tween: Tween<double>(begin: 0, end: (strength + 1) / 4),
+              builder: (context, value, _) => LinearProgressIndicator(
+                value: value,
+                backgroundColor: c.surfaceElevated,
+                valueColor: AlwaysStoppedAnimation<Color>(tone),
+                minHeight: 5,
               ),
-              const SizedBox(width: 12),
-              Text(
-                strengthText[strength],
-                style: TextStyle(
-                  color: strengthColors[strength],
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+            ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          _labels[strength],
+          style: TextStyle(
+            color: c.onSurfaceAccent(tone),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

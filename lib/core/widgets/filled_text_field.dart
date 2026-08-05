@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
-import 'package:padel_management_system/core/const/text_strings.dart';
 
+/// The app's standard filled input.
+///
+/// Borders, fill colour, hint colour and error styling all come from
+/// `ThemeData.inputDecorationTheme` (see `ATextFormFieldTheme`). This widget
+/// used to hand-roll them, which produced two visible bugs: the hint was drawn
+/// in exactly the same colour as typed text (so every empty field looked
+/// pre-filled), and only *some* of the four borders were overridden, so the
+/// corner radius jumped from 14 to 12 the moment a field was focused.
 class FilledTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -21,6 +28,14 @@ class FilledTextField extends StatelessWidget {
   final int? errorMaxLines;
   final bool showCounter;
   final TextStyle? style;
+
+  /// Focus/keyboard plumbing so multi-field forms can chain focus instead of
+  /// dismissing the keyboard on every field.
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final bool enabled;
+  final bool readOnly;
 
   const FilledTextField({
     super.key,
@@ -40,74 +55,54 @@ class FilledTextField extends StatelessWidget {
     this.errorMaxLines = 2,
     this.showCounter = false,
     this.style,
+    this.focusNode,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.enabled = true,
+    this.readOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = ADeviceutils.isDarkMode(context);
+    final c = context.padel;
+    final theme = Theme.of(context);
+    final bool isMultiline = (maxLines ?? 1) > 1;
 
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
+      textInputAction: textInputAction ??
+          (isMultiline ? TextInputAction.newline : TextInputAction.next),
+      onFieldSubmitted: onFieldSubmitted,
       inputFormatters: inputFormatters,
       validator: validator,
       autovalidateMode: autovalidateMode,
       obscureText: obscureText,
       onChanged: onChanged,
       maxLines: maxLines,
+      enabled: enabled,
+      readOnly: readOnly,
+      cursorColor: AColors.primaryColor,
       style: style ??
-          TextStyle(
-            color: isDark ? AColors.light : AColors.dark,
+          theme.textTheme.bodyLarge?.copyWith(
+            color: enabled ? c.textPrimary : c.textMuted,
             fontSize: ASizes.fontSizeMd,
           ),
       decoration: InputDecoration(
-        filled: true,
-        fillColor: isDark ? AColors.containerDark : AColors.containerLight,
         hintText: hintText,
         helperText: helperText,
         helperStyle: TextStyle(
-          color: AColors.darkGrey,
-          fontSize: ASizes.fontSizeSm,
+          color: c.textSecondary,
+          fontSize: ASizes.fontSizeSm - 2,
         ),
-        hintStyle: TextStyle(
-          color: isDark ? AColors.light : AColors.dark,
-          fontSize: ASizes.fontSizeMd,
-        ),
-        prefixIcon: prefixIcon != null
-            ? Icon(
-                prefixIcon,
-                color: isDark ? AColors.grey : Colors.grey.shade600,
-              )
-            : null,
+        // No explicit colour: the InputDecorator applies the theme's
+        // prefixIconColor, so the icon follows light/dark automatically.
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         suffixIcon: suffixIcon,
         counterText: showCounter ? null : '',
         errorMaxLines: errorMaxLines,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AColors.primaryColor,
-            width: 2,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
-            width: 1,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
-            width: 2,
-          ),
-        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,

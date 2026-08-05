@@ -1,135 +1,206 @@
-# Padel Management System
+# Padelit 🎾
 
-A Flutter portfolio prototype for padel-court discovery, booking interfaces, tournaments, player communication, and venue-owner dashboards.
+A padel court-booking platform built with Flutter, with three distinct
+experiences behind one codebase: **players** who book courts and find games,
+**club owners** who run the venues, and **administrators** who keep the
+platform healthy.
 
-[Repository](https://github.com/noaman03/padel-management-system)
+Runs entirely offline against a seeded demo dataset — clone it, run it, and
+every screen is populated and interactive.
 
-## Project Status
+<p align="center">
+  <img src="screenshots/01-light-login.png" width="24%" alt="Sign in" />
+  <img src="screenshots/08-light-tournaments.png" width="24%" alt="Tournaments" />
+  <img src="screenshots/04-dark-courts.png" width="24%" alt="Court discovery in dark mode" />
+  <img src="screenshots/19-light-owner-dashboard.png" width="24%" alt="Owner dashboard" />
+</p>
 
-This project combines implemented Flutter interfaces, selected Firebase data paths, and local demonstration behavior. It is not a production booking system. Authentication, payments, chat, tournaments, and several owner workflows are simulated or only partially connected.
+**▶ [Watch the 2-minute demo reel](demo/padelit-demo.mp4)** — a full walkthrough
+of all three roles in both themes.
 
-No verified project screenshots are currently committed to the repository.
+---
 
-## Demo Authentication Warning
+## Demo accounts
 
-> The main login controller contains demonstration-only behavior. `owner` / `owner` opens the owner interface, while other non-empty credentials are accepted as a player after a short delay. These checks are hardcoded and must never be used for real authentication.
+The login screen lists all three and signs you in with a single tap; these are
+the credentials behind them.
 
-A separate Firebase Authentication class and registration flow also exist, but the primary login controller does not call that service.
-
-## Feature Status
-
-| Area | Status | Verified behavior |
+| Role | Email | Password |
 | --- | --- | --- |
-| Player login | Simulated | The main controller accepts non-empty player credentials locally. |
-| Owner login | Simulated | The hardcoded demonstration credentials open the owner dashboard. |
-| Firebase registration | Partial | Email/password Firebase methods and role document writes exist separately from the main login path. |
-| Court discovery | Implemented data path | `PadelCourtRepository` reads and searches court data from Cloud Firestore. |
-| Court booking | Implemented data path | The court repository creates booking records and updates court statistics. |
-| Checkout | Simulated | The UI waits locally and displays a successful payment result; no payment gateway is called. |
-| Player chat | Demo data | Conversation and message lists are seeded in memory; sent messages are not persisted. |
-| Tournaments and open matches | Demo/local state | Player controllers and owner screens use local lists or demonstration content. |
-| Owner court management | Demo/local state | Court management screens use in-memory content; Firebase integration is not completed. |
-| Owner dashboard | Demo/local state | Summary values and management sections are presentation-focused. |
+| Player | `ahmed@email.com` | `AMZ 123 mh` |
+| Administrator | `admin@email.com` | `admin123` |
+| Court owner | `owner` | `owner` |
 
-## Player Experience
+On the web build you can also deep-link straight into a panel with
+`?demo=player`, `?demo=admin` or `?demo=owner`.
 
-- Browse and search padel courts
-- Open court details and availability interfaces
-- Create reservation records through the Firestore repository path
-- Review reservation, tournament, and open-match interfaces
-- Use the local chat demonstration
-- Review checkout and payment-method interfaces
+---
 
-## Owner Experience
+## What it does
 
-- Open an owner dashboard
-- Review court, booking, tournament, and management interfaces
-- Add or edit locally represented courts and tournaments
+### Player
 
-Owner management screens should be treated as UI prototypes until their data operations are connected and tested.
+- **Court discovery** — search, filter by price / court type / facilities,
+  browse by area, or sort by distance. Location is optional: pick a starting
+  area and distance sorting works without granting a device permission.
+- **Booking** — pick a day and an hour from the availability grid, confirm, and
+  pay through the checkout flow. Bookings appear in *My Reservations* and in the
+  home carousel, where they can be rebooked or cancelled.
+- **Open matches** — browse games that need players, join one (the roster and
+  player count update immediately), or create your own with a validated form.
+  Join requests to your own matches can be accepted or declined.
+- **Tournaments** — browse official and player-run events, open a full
+  breakdown of format, prizes, schedule and capacity, send an entry request, and
+  organise your own. Entry requests to your tournaments are managed in-app.
+- **Messages** — conversation list and threads with players and club owners.
 
-## Technology Stack
+### Court owner
 
-- Flutter and Dart
-- Material UI
-- GetX for navigation and several controllers
-- Riverpod through `ProviderScope` and provider-based features
-- Firebase Core, Authentication, Cloud Firestore, and Storage packages
-- Image picker and location packages
+- Dashboard with today's bookings, active courts, revenue and pending items.
+- Court management — create and edit courts, manage photos, pricing, facilities
+  and availability.
+- Tournament management — create, edit, archive and manage registrations, with a
+  full validated editor.
 
-## Project Structure
+### Administrator
 
-```text
-lib/
-  core/                         Shared themes, routes, and services
-  Features/
-    auth/                       Login and registration interfaces
-    players/
-      courts/                   Court entities, repository, controllers, and screens
-      checkout/                 Simulated checkout interface
-      chat/                     Local demonstration conversations and messages
-      tournaments/              Player tournament interfaces and local state
-    owner/                      Owner dashboard and management interfaces
-  Models/                       Shared presentation models
-  Screens/                      Additional application screens
-```
+- Platform metrics, an operations queue with per-row actions, and directories
+  for players, courts and bookings with CSV export.
 
-## Prerequisites
+---
 
-- Flutter SDK compatible with `pubspec.yaml`
-- Android Studio or another Flutter-capable IDE
-- Android device or emulator
-- A Firebase project when testing the connected registration and court repository paths
+## Engineering notes
 
-## Firebase Configuration
+The interesting parts, and why they are built the way they are.
 
-1. Register an Android application in Firebase.
-2. Enable Email/Password authentication if testing the Firebase registration service.
-3. Create Cloud Firestore and Cloud Storage.
-4. Replace `android/app/google-services.json` with your own Firebase client configuration.
-5. Create and test security rules for the collections used by your deployment.
+**A real two-theme design system.** `ThemeData` supplies explicit light and dark
+`ColorScheme`s plus ~25 component themes (card, dialog, drawer, dropdown,
+slider, snackbar, bottom sheet, tab bar, list tile, date/time picker …), so
+screens describe *structure* and the theme decides colour. On top of that,
+`context.padel` exposes semantic tokens — `surface`, `textPrimary`, `border`,
+`primarySoft`, `soft(color)`, `onSurfaceAccent(color)` — which is what keeps
+status colours legible on both backgrounds instead of hardcoding white.
+Appearance is switchable in-app (Light / Dark / Auto), not just via the OS.
 
-The repository does not include Firestore or Storage rules. An iOS runner exists, but no `GoogleService-Info.plist` is committed, so iOS Firebase setup is incomplete.
+**One feedback layer.** `AppFeedback` drives a root `ScaffoldMessenger` through a
+global key, so controllers, sheets and dialogs all report success and failure the
+same way. Modal sheets register their own messenger so toasts raised inside a
+sheet draw above it rather than behind it. `showAppSheet` and
+`AppFeedback.confirm` give every bottom sheet and confirmation the same
+structure, theming and safe-area handling.
 
-## Installation and Running
+**Offline-first demo data.** There is no backend. Controllers seed realistic
+Egyptian data and mutate it in place, so actions have visible consequences:
+joining a tournament increments its participant count, adds it to *My
+Tournaments* and flips the button to *Requested*. Firebase initialisation is
+wrapped so an unreachable project can never block startup.
+
+**State management.** GetX reactive controllers for feature state
+(`TournamentsController`, `OpenMatchesController`, `CourtBrowseController` and
+its sub-controllers for filters/areas/location/data), Riverpod for auth
+providers, and `SessionController` as the single source of truth for who is
+signed in and which panel they belong to.
+
+**Tests.** `flutter test` covers the behaviour that matters: role → panel
+routing, credential rejection, tournament and match join semantics (including
+double-join and full-capacity paths), filter reset, and theme invariants such as
+"dark input fill must contrast with dark body text" and "both themes supply an
+explicit ColorScheme".
+
+---
+
+## Running it
+
+Requires Flutter **3.44+** (Dart 3.12+).
 
 ```bash
-git clone https://github.com/noaman03/padel-management-system.git
-cd padel-management-system
 flutter pub get
 flutter run
 ```
 
-## Validation
+Checks:
 
 ```bash
-flutter analyze
-flutter test
+flutter analyze && flutter test
 ```
 
-These checks validate Flutter code only. Booking, Firebase, location, and payment behavior require integration testing with a configured test project.
+The web build needs one flag, because the icon-font subsetter fails on some
+toolchains:
 
-## Localization and Sample Data
+```bash
+flutter build web --release --no-tree-shake-icons
+```
 
-The interfaces use Egyptian names, locations, and EGP pricing in demonstration content. English and Arabic-facing text appears in the project, but a complete localization audit and production translation workflow were not found.
+---
 
-## Known Limitations
+## Regenerating the screenshots and the demo video
 
-- The primary login path is not secure authentication.
-- Payment processing is mocked.
-- Chat, tournaments, open matches, and several owner workflows are not persisted.
-- Firebase configuration is incomplete across platforms, and security rules are not committed.
-- No automated integration or end-to-end tests were found for booking, authentication, or payment.
-- Demonstration data must not be presented as live availability or completed transactions.
+Both are produced by a scripted walkthrough rather than by hand, so they never
+drift from the app.
 
-## Security
+```bash
+python tool/demo/make_assets.py
+```
 
-Remove the hardcoded owner credentials and connect every role to a verified authentication and authorization system before deployment. Review Firebase rules, validate all server-side permissions, and never commit service-account credentials or production user data.
+That builds the web release, serves it, drives it with Playwright — enabling
+Flutter's semantics tree so controls can be addressed by their accessible label
+— captures all 46 stills across both themes, and renders `demo/padelit-demo.mp4`
+with title cards and captions.
 
-## License
+Requires `playwright` (`playwright install chromium`), `opencv-python`,
+`pillow`, and `imageio-ffmpeg` for H.264 output.
 
-No software license has been selected. The absence of a license means reuse rights have not been granted.
+---
 
-## Contact
+## Project structure
 
-[Ahmed Noaman](https://github.com/noaman03) | [LinkedIn](https://www.linkedin.com/in/ahmed-noaman-07ab162b4)
+```
+lib/
+├── core/
+│   ├── const/            colours + semantic palette, sizes, images
+│   ├── controllers/      session and theme controllers
+│   ├── Service/          in-memory stores (reservations, chat), Firebase wrappers
+│   ├── utils/
+│   │   ├── feedback/     AppFeedback, showAppSheet
+│   │   ├── theme/        ThemeData and per-component themes
+│   │   ├── formatters/   currency, dates, phone numbers
+│   │   └── helpers/      pricing, misc
+│   └── widgets/          shared Player* components (card, header, tabs, chips…)
+├── Features/
+│   ├── auth/             login, signup flow, demo accounts
+│   ├── players/          courts, court_details, open_matches, tournaments,
+│   │                     checkout, reservations, chat
+│   ├── owner/            dashboard, court_management, tournaments, data
+│   └── admin/            admin panel and controller
+├── Models/               court, booking, chat, user
+├── Screens/home/         player shell (bottom nav + drawer)
+└── main.dart
+tool/demo/                screenshot + video capture pipeline
+test/                     behaviour and theme tests
+```
+
+108 Dart files, `flutter analyze` clean.
+
+---
+
+## Screens
+
+All 46 stills live in [`screenshots/`](screenshots/), named
+`NN-<theme>-<screen>.png`, with captions in
+[`screenshots/manifest.json`](screenshots/manifest.json).
+
+| | Light | Dark |
+| --- | --- | --- |
+| Court discovery | ![](screenshots/04-light-courts.png) | ![](screenshots/04-dark-courts.png) |
+| Tournament details | ![](screenshots/10-light-tournament-details.png) | ![](screenshots/10-dark-tournament-details.png) |
+| Create a match | ![](screenshots/17-light-match-create.png) | ![](screenshots/17-dark-match-create.png) |
+| Owner tournaments | ![](screenshots/21-light-owner-tournaments.png) | ![](screenshots/21-dark-owner-tournaments.png) |
+| Admin panel | ![](screenshots/22-light-admin.png) | ![](screenshots/22-dark-admin.png) |
+
+---
+
+## Status
+
+A portfolio project, not a production service. The data layer is deliberately
+in-memory so the app is fully explorable without credentials or a backend;
+Firebase wiring is present but every screen degrades gracefully without it.

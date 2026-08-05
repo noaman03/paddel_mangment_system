@@ -7,7 +7,7 @@ class FilterController extends GetxController {
 
   // Filters
   final RxDouble minPrice = 0.0.obs;
-  final RxDouble maxPrice = 1000.0.obs;
+  final RxDouble maxPrice = maxPriceLimit.obs;
   final RxList<String> selectedCourtTypes = <String>[].obs;
   final RxList<String> selectedFacilities = <String>[].obs;
   final RxString selectedArea = ''.obs;
@@ -69,10 +69,27 @@ class FilterController extends GetxController {
     selectedArea.value = area;
   }
 
+  /// True when the Filters sheet holds a non-default value. Drives the green
+  /// "active" state on the Filters button, so it must not include the area or
+  /// distance filters (those belong to their own buttons).
+  bool get hasSheetFilters =>
+      selectedCourtTypes.isNotEmpty ||
+      selectedFacilities.isNotEmpty ||
+      minPrice.value > 0 ||
+      maxPrice.value < maxPriceLimit;
+
+  bool get hasAreaFilter => selectedArea.value.isNotEmpty;
+
+  bool get hasSearch => searchQuery.value.isNotEmpty;
+
+  /// Upper bound of the price slider, kept in one place so the "is the price
+  /// filter active?" test can never drift from the widget.
+  static const double maxPriceLimit = 1000.0;
+
   // Clear filters
   void clearAllFilters() {
     minPrice.value = 0.0;
-    maxPrice.value = 1000.0;
+    maxPrice.value = maxPriceLimit;
     selectedCourtTypes.clear();
     selectedFacilities.clear();
     selectedArea.value = '';

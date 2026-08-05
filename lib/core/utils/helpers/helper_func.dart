@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_management_system/core/utils/feedback/app_feedback.dart';
 
 class AHelperFunction {
   /// Define your product specific colors here and it witt natch the attribute cotors and show specific
@@ -44,12 +45,13 @@ class AHelperFunction {
     }
   }
 
-  // Displays temporary message at bottom of screen
-  static void showSnackBar(String message) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-    );
-  }
+  /// Displays a temporary message at the bottom of the screen.
+  ///
+  /// Routed through [AppFeedback] instead of `ScaffoldMessenger.of(Get.context!)`:
+  /// the force-unwrapped context threw whenever this was called before the
+  /// first frame or after the navigator was torn down, so the feedback never
+  /// reached the user.
+  static void showSnackBar(String message) => AppFeedback.info(message);
 
   // Shows a dialog box with title, message and OK button
   static void showAlert(String title, String message, BuildContext context) {
@@ -78,12 +80,9 @@ class AHelperFunction {
   }
 
   // Shortens text to specified length with ellipsis if needed
-  static String TruncateText(String text, {int maxLength = 100}) {
-    if (text.length <= maxLength) {
-      return text;
-    } else {
-      return text.substring(0, maxLength) + '...';
-    }
+  static String truncateText(String text, {int maxLength = 100}) {
+    if (text.length <= maxLength) return text;
+    return '${text.substring(0, maxLength)}...';
   }
 
   // Checks if app is currently in dark mode
@@ -91,20 +90,28 @@ class AHelperFunction {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
-  // Gets current device screen dimensions
-  static Size screenSize() {
-    return MediaQuery.of(Get.context!).size;
+  /// Fallback used when no context is available yet (a phone-sized viewport),
+  /// so a sizing helper can never throw a null-check exception mid-callback.
+  static const Size _fallbackScreenSize = Size(390, 844);
+
+  /// Current screen size.
+  ///
+  /// Pass the local [context] where possible: the value then also responds to
+  /// rotation and split-screen. `Get.context` is only the last resort and is
+  /// null-checked rather than force-unwrapped.
+  static Size screenSize([BuildContext? context]) {
+    final ctx = context ?? Get.context;
+    if (ctx == null) return _fallbackScreenSize;
+    return MediaQuery.of(ctx).size;
   }
 
   // Gets current device screen width
-  static double screenWidth() {
-    return MediaQuery.of(Get.context!).size.width;
-  }
+  static double screenWidth([BuildContext? context]) =>
+      screenSize(context).width;
 
   // Gets current device screen height
-  static double screenHeight() {
-    return MediaQuery.of(Get.context!).size.height;
-  }
+  static double screenHeight([BuildContext? context]) =>
+      screenSize(context).height;
 
   // Formats DateTime to specified string format
   static String getFormattedDate(

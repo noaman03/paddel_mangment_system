@@ -3,79 +3,55 @@ import 'package:get/get.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/controller/datebirth_controller.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
-import 'package:padel_management_system/core/const/text_strings.dart';
 
 class BirthDate extends StatelessWidget {
-  const BirthDate({
-    super.key,
-    required this.controller,
-  });
+  const BirthDate({super.key, required this.controller});
 
   final UserRestController controller;
 
   @override
   Widget build(BuildContext context) {
-    final dark = ADeviceutils.isDarkMode(context);
+    final c = context.padel;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Date of Birth',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: ASizes.fontSizeMd,
             fontWeight: FontWeight.w600,
-            color: dark ? AColors.light : AColors.dark,
+            color: c.textPrimary,
           ),
         ),
         const SizedBox(height: ASizes.spaceBtwInputFields),
 
-        // Date picker field with GetX reactive updates
-        Obx(() => TextField(
-              controller: controller.birthdateController,
-              readOnly: true,
-              style: TextStyle(
-                  fontSize: 16, color: dark ? AColors.light : AColors.dark),
-              decoration: InputDecoration(
-                hintText: 'Select your date of birth',
-                hintStyle:
-                    TextStyle(color: dark ? AColors.light : AColors.dark),
-                prefixIcon: Icon(
-                  Icons.calendar_today,
-                  color: dark ? AColors.light : AColors.dark,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: AColors.primaryColor,
-                    width: 2.0,
-                  ),
-                ),
-                filled: true,
-                fillColor:
-                    dark ? AColors.containerDark : AColors.containerLight,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                // Show selected date or placeholder
-                suffixIcon: controller.selectedDate.value != null
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.clear,
-                          color: dark ? AColors.light : AColors.dark,
-                        ),
-                        onPressed: () {
-                          controller.updateSelectedDate(null);
-                        },
-                      )
-                    : null,
+        // The fill, hint and icon colours now come from inputDecorationTheme;
+        // hand-rolling them made the hint identical to the typed value.
+        Obx(
+          () => TextField(
+            controller: controller.birthdateController,
+            readOnly: true,
+            style:
+                Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Select your date of birth',
+              prefixIcon: const Icon(Icons.calendar_today, size: 20),
+              suffixIcon: controller.selectedDate.value == null
+                  ? null
+                  : IconButton(
+                      tooltip: 'Clear date',
+                      icon: const Icon(Icons.clear),
+                      onPressed: () => controller.updateSelectedDate(null),
+                    ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 18,
               ),
-              onTap: () => controller.selectDate(context),
-            )),
+            ),
+            onTap: () => controller.selectDate(context),
+          ),
+        ),
       ],
     );
   }

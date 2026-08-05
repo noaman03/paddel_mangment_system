@@ -2,154 +2,171 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:padel_management_system/Features/auth/presentation/signup/controller/complete_profile_controller.dart';
-import 'package:padel_management_system/Features/auth/presentation/signup/user_rest.dart';
-import 'package:padel_management_system/Screens/home/player_home.dart';
 import 'package:padel_management_system/Features/auth/data/provider_auth.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/complete_profile_controller.dart';
+import 'package:padel_management_system/Features/auth/presentation/signup/controller/datebirth_controller.dart';
+import 'package:padel_management_system/core/Service/firebase/firebase_storage.dart';
 import 'package:padel_management_system/core/Service/provider/provider_database.dart';
 
-class CompleteProfileButton extends StatelessWidget {
-  final DateTime? selectedDate;
-  final String selectedGender;
-  final List<String> avatarImages;
-  final int selectedAvatarIndex;
+/// Storage service used by the (flag-guarded) remote signup path.
+final firebaseStorageProvider = Provider<FirebaseStorageService>((ref) {
+  return FirebaseStorageService();
+});
 
-  /// These callbacks allow you to inject Riverpod or other DI logic
-  final Future<UserCredential> Function() signup;
-  final String? Function() getUserId;
-  final Future<void> Function() createUserData;
-  final Future<void> Function() uploadAvatar;
-  final VoidCallback onSuccess;
-
-  CompleteProfileButton({
-    super.key,
-    required this.selectedDate,
-    required this.selectedGender,
-    required this.avatarImages,
-    required this.selectedAvatarIndex,
-    required this.signup,
-    required this.getUserId,
-    required this.createUserData,
-    required this.uploadAvatar,
-    required this.onSuccess,
+/// Everything step 1 and 2 collected, handed to the final step.
+@immutable
+class SignUpDraft {
+  const SignUpDraft({
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.password,
+    required this.confirmPassword,
+    required this.phonenumber,
+    this.role = 'player',
   });
 
-  final CompleteProfileController controller =
-      Get.put(CompleteProfileController());
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() => SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 0,
-              // Replace with AColors.primaryColor
-            ),
-            onPressed: controller.isLoading.value
-                ? null
-                : () => controller.completeProfile(
-                      context: context,
-                      selectedDate: selectedDate,
-                      selectedGender: selectedGender,
-                      avatarImages: avatarImages,
-                      selectedAvatarIndex: selectedAvatarIndex,
-                      signup: signup,
-                      getUserId: getUserId,
-                      createUserData: createUserData,
-                      uploadAvatar: uploadAvatar,
-                      onSuccess: onSuccess,
-                    ),
-            child: controller.isLoading.value
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Text(
-                    'Complete Profile',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-          ),
-        ));
-  }
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String password;
+  final String confirmPassword;
+  final int phonenumber;
+  final String role;
 }
 
-class CompleteProfileWidget extends StatelessWidget {
+/// The "Complete Profile" call to action of the final signup step.
+///
+/// This is a [StatefulWidget] on purpose: the previous version registered its
+/// GetX controller in a field initializer of a `StatelessWidget` that lived
+/// inside an `Obx`, so every avatar/gender tap replaced the controller, reset
+/// `isLoading` and re-enabled the button mid-submit.
+class CompleteProfileWidget extends StatefulWidget {
   const CompleteProfileWidget({
     super.key,
-    required this.selectedDate,
-    required this.selectedGender,
+    required this.controller,
     required this.avatarImages,
-    required this.selectedAvatarIndex,
+    required this.draft,
     required this.ref,
-    required this.widget,
   });
 
-  final DateTime? selectedDate;
-  final String selectedGender;
+  final UserRestController controller;
   final List<String> avatarImages;
-  final int selectedAvatarIndex;
+  final SignUpDraft draft;
   final WidgetRef ref;
-  final UserRest widget;
+
+  @override
+  State<CompleteProfileWidget> createState() => _CompleteProfileWidgetState();
+}
+
+class _CompleteProfileWidgetState extends State<CompleteProfileWidget> {
+  late final CompleteProfileController profileController;
+
+  @override
+  void initState() {
+    super.initState();
+    profileController = Get.isRegistered<CompleteProfileController>()
+        ? Get.find<CompleteProfileController>()
+        : Get.put(CompleteProfileController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<CompleteProfileController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return CompleteProfileButton(
-      selectedDate: selectedDate,
-      selectedGender: selectedGender,
-      avatarImages: avatarImages,
-      selectedAvatarIndex: selectedAvatarIndex,
-      signup: () async {
-        // Call signup and return a UserCredential to match the expected return type
-        await ref.read(authStateProvider.notifier).signup(
-              email: widget.email,
-              firstName: widget.firstName,
-              lastName: widget.lastName,
-              password: widget.password,
-              confirmPassword: widget.confirmPassword,
-              role: widget.role,
-              phonenumber: widget.phonenumber,
-              birthdate: selectedDate!,
-              gender: selectedGender,
-            );
-
-        // Return a UserCredential (you might need to adjust this based on your actual implementation)
-        return await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: widget.email,
-          password: widget.password,
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: Obx(() {
+        final loading = profileController.isLoading.value;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            elevation: 0,
+          ),
+          onPressed: loading ? null : _submit,
+          child: loading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text(
+                  'Complete Profile',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         );
-      },
-      getUserId: () => FirebaseAuth.instance.currentUser?.uid,
-      createUserData: () => ref.read(databaseProvider.notifier).createUser(
-            email: widget.email,
-            firstName: widget.firstName,
-            lastName: widget.lastName,
-            role: widget.role,
-            phonenumber: widget.phonenumber,
-            birthdate: selectedDate!,
-            gender: selectedGender,
-            collectionname: 'players',
-          ),
-      uploadAvatar: () => ref.read(firebaseStorageProvider).uploadPlayerAvatar(
-            FirebaseAuth.instance.currentUser!.uid,
-            avatarImages[selectedAvatarIndex],
-          ),
-      onSuccess: () {
-        // Navigate to home or show success
-        Get.to(const PlayerHome());
-      },
+      }),
     );
+  }
+
+  Future<void> _submit() {
+    final restController = widget.controller;
+    final avatarIndex = restController.selectedAvatarIndex.value;
+    final avatarAsset = avatarIndex < widget.avatarImages.length
+        ? widget.avatarImages[avatarIndex]
+        : null;
+
+    return profileController.completeProfile(
+      selectedDate: restController.selectedDate.value,
+      selectedGender: restController.selectedGender.value,
+      email: widget.draft.email,
+      firstName: widget.draft.firstName,
+      lastName: widget.draft.lastName,
+      avatarAsset: avatarAsset,
+      remoteSignup: _remoteSignup,
+    );
+  }
+
+  /// Only invoked when [CompleteProfileController.kUseFirebase] is on.
+  Future<void> _remoteSignup() async {
+    final draft = widget.draft;
+    final restController = widget.controller;
+    final birthdate = restController.selectedDate.value!;
+    final gender = restController.selectedGender.value;
+
+    await widget.ref.read(authStateProvider.notifier).signup(
+          email: draft.email,
+          firstName: draft.firstName,
+          lastName: draft.lastName,
+          password: draft.password,
+          confirmPassword: draft.confirmPassword,
+          role: draft.role,
+          phonenumber: draft.phonenumber,
+          birthdate: birthdate,
+          gender: gender,
+        );
+
+    await widget.ref.read(databaseProvider.notifier).createUser(
+          email: draft.email,
+          firstName: draft.firstName,
+          lastName: draft.lastName,
+          role: draft.role,
+          phonenumber: draft.phonenumber,
+          birthdate: birthdate,
+          gender: gender,
+          collectionname: 'players',
+        );
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final avatarIndex = restController.selectedAvatarIndex.value;
+    if (uid != null && avatarIndex < widget.avatarImages.length) {
+      await widget.ref
+          .read(firebaseStorageProvider)
+          .uploadPlayerAvatar(uid, widget.avatarImages[avatarIndex]);
+    }
   }
 }

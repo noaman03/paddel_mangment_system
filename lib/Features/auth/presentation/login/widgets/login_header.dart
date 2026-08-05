@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:padel_management_system/core/const/colors.dart';
 import 'package:padel_management_system/core/const/sizes.dart';
-import 'package:padel_management_system/core/const/text_strings.dart';
 
 class LoginHeader extends StatefulWidget {
   final bool isCompact;
@@ -44,7 +43,7 @@ class _LoginHeaderState extends State<LoginHeader>
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = ADeviceutils.isDarkMode(context);
+    final c = context.padel;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -59,11 +58,8 @@ class _LoginHeaderState extends State<LoginHeader>
                 width: widget.isCompact ? 70 : 100,
                 height: widget.isCompact ? 70 : 100,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AColors.primaryColor,
-                      AColors.primaryColor.withOpacity(0.8),
-                    ],
+                  gradient: const LinearGradient(
+                    colors: AColors.brandGradient,
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -71,7 +67,7 @@ class _LoginHeaderState extends State<LoginHeader>
                       BorderRadius.circular(widget.isCompact ? 18 : 24),
                   boxShadow: [
                     BoxShadow(
-                      color: AColors.primaryColor.withOpacity(0.3),
+                      color: AColors.primaryColor.withValues(alpha: 0.3),
                       blurRadius: widget.isCompact ? 15 : 20,
                       offset: Offset(0, widget.isCompact ? 6 : 8),
                     ),
@@ -96,8 +92,7 @@ class _LoginHeaderState extends State<LoginHeader>
             child: Text(
               'Welcome Back!',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: AColors.primaryColor,
-                  fontSize: widget.isCompact ? 24 : 32),
+                  color: c.brandText, fontSize: widget.isCompact ? 24 : 32),
               textAlign: TextAlign.center,
             ),
           ),
@@ -114,7 +109,7 @@ class _LoginHeaderState extends State<LoginHeader>
                 child: Text(
                   'Ready to play some padel? Let\'s get you logged in!',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark ? AColors.grey : AColors.darkGrey,
+                        color: c.textSecondary,
                         fontSize: 16,
                       ),
                   textAlign: TextAlign.center,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_management_system/Features/auth/presentation/signup/user_rest.dart';
+import 'package:padel_management_system/core/utils/feedback/app_feedback.dart';
 
 class ContinueDataController extends GetxController {
   var isLoading = false.obs;
@@ -9,6 +10,10 @@ class ContinueDataController extends GetxController {
   var currentPassword = ''.obs; // Observable for password strength
   var currentConfirmPassword =
       ''.obs; // Observable for confirm password matching
+
+  /// Owned by the controller so the Continue button (a sibling widget) can
+  /// trigger the inline field errors the form declares.
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   void togglePasswordVisibility() => isObscure.value = !isObscure.value;
   void toggleConfirmPasswordVisibility() =>
@@ -41,8 +46,7 @@ class ContinueDataController extends GetxController {
         currentConfirmPassword.value.isNotEmpty;
   }
 
-  void validateAndContinue(
-    BuildContext context,
+  Future<void> validateAndContinue(
     TextEditingController firstNameController,
     TextEditingController lastNameController,
     TextEditingController phoneController,
@@ -50,6 +54,7 @@ class ContinueDataController extends GetxController {
     TextEditingController confirmPasswordController,
     String email,
   ) async {
+    if (isLoading.value) return;
     isLoading.value = true;
 
     try {
@@ -59,29 +64,26 @@ class ContinueDataController extends GetxController {
       final password = passwordController.text.trim();
       final confirmPassword = confirmPasswordController.text.trim();
 
-      // Validation checks
+      // Paints the inline errors on every field, not just the touched ones.
+      formKey.currentState?.validate();
+
       if (!_validateFields(
-          context, firstName, lastName, phone, password, confirmPassword)) {
-        isLoading.value = false;
+          firstName, lastName, phone, password, confirmPassword)) {
         return;
       }
 
       // Parse phone number
-      int phoneNumber;
+      final int phoneNumber;
       try {
         phoneNumber = int.parse(phone.replaceAll(RegExp(r'[^\d]'), ''));
-      } catch (e) {
-        _showErrorSnackBar(context, 'Invalid phone number format');
-        isLoading.value = false;
+      } catch (_) {
+        _showError('Invalid phone number format');
         return;
       }
 
       // Simulate network delay
       await Future.delayed(const Duration(milliseconds: 300));
 
-      isLoading.value = false;
-
-      // Navigate to the next screen
       Get.to(() => UserRest(
             email: email,
             firstName: firstName,
@@ -91,61 +93,52 @@ class ContinueDataController extends GetxController {
             phonenumber: phoneNumber,
           ));
     } catch (e) {
+      _showError('An unexpected error occurred: $e');
+    } finally {
       isLoading.value = false;
-      _showErrorSnackBar(
-          context, 'An unexpected error occurred: ${e.toString()}');
     }
   }
 
   bool _validateFields(
-    BuildContext context,
     String firstName,
     String lastName,
     String phone,
     String password,
     String confirmPassword,
   ) {
-    // Check for empty fields
     if (firstName.isEmpty ||
         lastName.isEmpty ||
         phone.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
-      _showErrorSnackBar(context, 'Please fill in all fields');
+      _showError('Please fill in all fields');
       return false;
     }
 
-    // Validate first name
     if (!_isValidName(firstName)) {
-      _showErrorSnackBar(
-          context, 'Please enter a valid first name (letters only)');
+      _showError('Please enter a valid first name (letters only)');
       return false;
     }
 
-    // Validate last name
     if (!_isValidName(lastName)) {
-      _showErrorSnackBar(
-          context, 'Please enter a valid last name (letters only)');
+      _showError('Please enter a valid last name (letters only)');
       return false;
     }
 
-    // Validate phone number (adjust for your requirements)
     if (!_isValidPhoneNumber(phone)) {
-      _showErrorSnackBar(
-          context, 'Please enter a valid phone number (11 digits)');
+      _showError(
+          'Please enter a valid phone number (11 digits, starts with 01)');
       return false;
     }
 
-    // Validate password strength
     if (!_isValidPassword(password)) {
-      _showErrorSnackBar(context,
+      _showError(
           'Password must be at least 8 characters with uppercase, lowercase, and number');
       return false;
     }
 
-    // Check password match
     if (password != confirmPassword) {
-      _showErrorSnackBar(context, 'Passwords do not match');
+      _showError('Passwords do not match');
       return false;
     }
 
@@ -157,8 +150,8 @@ class ContinueDataController extends GetxController {
   }
 
   bool _isValidPhoneNumber(String phone) {
-    // Updated for Egyptian phone numbers (11 digits starting with 01)
-    String cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
+    // Egyptian mobile numbers: 11 digits starting with 01.
+    final String cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
     return cleanPhone.length == 11 && cleanPhone.startsWith('01');
   }
 
@@ -169,27 +162,10 @@ class ContinueDataController extends GetxController {
         RegExp(r'[0-9]').hasMatch(password);
   }
 
-  void _showErrorSnackBar(BuildContext context, String message) {
-    Get.snackbar(
-      'Validation Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.shade700,
-      colorText: Colors.white,
-      borderRadius: 10,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
-      icon: const Icon(Icons.error_outline, color: Colors.white),
-    );
-  }
-
-  void clearFormData() {
-    isLoading.value = false;
-    isObscure.value = true;
-    isConfirmObscure.value = true;
-    currentPassword.value = '';
-    currentConfirmPassword.value = '';
-  }
+  /// `Get.snackbar` throws "No Overlay found" on this Flutter version, which is
+  /// why every step-2 validation error used to vanish silently.
+  void _showError(String message) =>
+      AppFeedback.error('Check your details', message);
 
   // Individual field validators
   String? validateFirstName(String? value) {

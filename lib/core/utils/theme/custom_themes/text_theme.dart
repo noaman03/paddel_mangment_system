@@ -1,122 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:padel_management_system/core/const/colors.dart';
 
 class ATextTheme {
   ATextTheme._();
 
   static const String fontFamily = 'Roboto';
 
-  static TextTheme lightTextTheme = TextTheme(
-    headlineLarge: TextStyle().copyWith(
-      fontSize: 32.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-    ),
-    headlineMedium: TextStyle().copyWith(
-      fontSize: 24.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-    ),
-    headlineSmall: TextStyle().copyWith(
-      fontSize: 18.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-    ),
-    titleLarge: TextStyle().copyWith(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-    ),
-    titleMedium: TextStyle().copyWith(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.black,
-    ),
-    titleSmall: TextStyle().copyWith(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w400,
-      color: Colors.black,
-    ),
-    bodyLarge: TextStyle().copyWith(
-      fontSize: 14.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.black,
-    ),
-    bodyMedium: TextStyle().copyWith(
-      fontSize: 14.0,
-      fontWeight: FontWeight.normal,
-      color: Colors.black,
-    ),
-    bodySmall: TextStyle().copyWith(
-      fontSize: 14.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.black.withOpacity(0.5),
-    ),
-    labelLarge: TextStyle().copyWith(
-      fontSize: 12.0,
-      fontWeight: FontWeight.normal,
-      color: Colors.black,
-    ),
-    labelMedium: TextStyle().copyWith(
-      fontSize: 12.0,
-      fontWeight: FontWeight.normal,
-      color: Colors.black.withOpacity(0.5),
-    ),
-  );
-  static TextTheme darkTextTheme = TextTheme(
-    headlineLarge: TextStyle().copyWith(
-      fontSize: 32.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    ),
-    headlineMedium: TextStyle().copyWith(
-      fontSize: 24.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.white,
-    ),
-    headlineSmall: TextStyle().copyWith(
-      fontSize: 18.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.white,
-    ),
-    titleLarge: TextStyle().copyWith(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.white,
-    ),
-    titleMedium: TextStyle().copyWith(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.white,
-    ),
-    titleSmall: TextStyle().copyWith(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w400,
-      color: Colors.white,
-    ),
-    bodyLarge: TextStyle().copyWith(
-      fontSize: 14.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.white,
-    ),
-    bodyMedium: TextStyle().copyWith(
-      fontSize: 14.0,
-      fontWeight: FontWeight.normal,
-      color: Colors.white,
-    ),
-    bodySmall: TextStyle().copyWith(
-      fontSize: 14.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.white.withOpacity(0.5),
-    ),
-    labelLarge: TextStyle().copyWith(
-      fontSize: 12.0,
-      fontWeight: FontWeight.normal,
-      color: Colors.white,
-    ),
-    labelMedium: TextStyle().copyWith(
-      fontSize: 12.0,
-      fontWeight: FontWeight.normal,
-      color: Colors.white.withOpacity(0.5),
-    ),
-  );
+  static TextTheme _build(Color primary, Color secondary) => TextTheme(
+        headlineLarge: TextStyle(
+          fontSize: 32.0,
+          fontWeight: FontWeight.w800,
+          height: 1.15,
+          color: primary,
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 24.0,
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+          color: primary,
+        ),
+        headlineSmall: TextStyle(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+          color: primary,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 17.0,
+          fontWeight: FontWeight.w700,
+          color: primary,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 16.0,
+          fontWeight: FontWeight.w600,
+          color: primary,
+        ),
+        titleSmall: TextStyle(
+          fontSize: 14.0,
+          fontWeight: FontWeight.w600,
+          color: primary,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 15.0,
+          fontWeight: FontWeight.w500,
+          height: 1.4,
+          color: primary,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14.0,
+          fontWeight: FontWeight.normal,
+          height: 1.4,
+          color: primary,
+        ),
+        bodySmall: TextStyle(
+          fontSize: 13.0,
+          fontWeight: FontWeight.w500,
+          height: 1.35,
+          color: secondary,
+        ),
+        labelLarge: TextStyle(
+          fontSize: 13.0,
+          fontWeight: FontWeight.w600,
+          color: primary,
+        ),
+        labelMedium: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w500,
+          color: secondary,
+        ),
+        labelSmall: TextStyle(
+          fontSize: 11.0,
+          fontWeight: FontWeight.w500,
+          color: secondary,
+        ),
+      );
+
+  static final TextTheme lightTextTheme =
+      _build(AColors.textprimary, AColors.textsecondarry);
+
+  static final TextTheme darkTextTheme =
+      _build(AColors.textPrimaryDark, AColors.textSecondaryDark);
 }

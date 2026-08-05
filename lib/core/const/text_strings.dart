@@ -1,10 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+/// Device/platform helpers.
+///
+/// Deliberately free of `dart:io`: this file is imported by ordinary screens
+/// (e.g. the create-match tab), and on web the `dart:io` shim compiles but
+/// throws `UnsupportedError` at runtime. Platform checks go through
+/// [defaultTargetPlatform] instead, which is correct on every target.
 class ADeviceutils {
   // Hides the active keyboard by removing focus
   static void hideKeyboard(BuildContext context) {
@@ -99,24 +103,15 @@ class ADeviceutils {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
-  // Checks for active internet connection
-  static Future<bool> hasInternetConnection() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } on SocketException catch (_) {
-      return false;
-    }
-  }
-
-  // Detects iOS platform
+  // Detects iOS platform. False on web, where the browser may still report an
+  // iOS host.
   static bool isIOS() {
-    return Platform.isIOS;
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
   }
 
-  // Detects Android platform
+  // Detects Android platform.
   static bool isAndroid() {
-    return Platform.isAndroid;
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   }
 
   // Checks if app is currently in dark mode
